@@ -29,9 +29,11 @@ y Play.
 ## Estructura
 
 - `Assets/Scripts/`: `CamionRuta` (movimiento y colisiones), `CamaraSeguimiento`, `Navegacion` (escenas y paneles),
-  `AreaSegura` y `Girar`.
+  `AreaSegura`, `Girar` y `TextoConProfundidad`.
 - `Assets/Scenes/`: `Menu` y `Ruta`.
-- `Assets/Prefabs/`: el camión, tres autos y el tope, armados con figuras básicas de Unity; el modelo definitivo del
-  camión llega en las siguientes entregas.
+- `Assets/Prefabs/`: el camión, tres autos y el tope, armados con figuras básicas de Unity. El camión lleva el verde de
+  las unidades actuales de Guadalajara y el número R-743; el modelo definitivo y las otras pinturas llegan en las
+  siguientes entregas.
+- `Assets/Shaders/`: el texto 3D del número de ruta, que respeta la profundidad.
 
 Cada entrega lleva su etiqueta: `act-4.1`, `act-4.2`, etcétera.

@@ -101,6 +101,7 @@ MonoBehaviour:
   rapidezCambio: 9
   impulsoBrinco: 6.5
   distanciaSuelo: 0.25
+  subidaMaxima: 2.2
   navegacion: {fileID: 0}
 --- !u!1001 &6544528200681358436
 PrefabInstance:
