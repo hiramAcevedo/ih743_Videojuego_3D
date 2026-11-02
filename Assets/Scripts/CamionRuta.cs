@@ -2,15 +2,21 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 // El camión de ruta, personaje principal. Se mueve en los tres ejes con su Rigidbody:
-//   Z  avanza solo por la avenida a velocidad constante (la curva de dificultad llega en la 4.2);
+//   Z  avanza solo por la avenida, cada vez más rápido según los metros recorridos (la curva de dificultad);
 //   X  cambia entre tres carriles con las flechas, A y D o los botones de la pantalla;
 //   Y  brinca con la barra, W, flecha arriba o el botón BRINCAR, y sube y baja al pasar los topes.
 // Si choca con un obstáculo se detiene y avisa a la navegación; si llega a la base, termina el tramo de prueba.
 [RequireComponent(typeof(Rigidbody))]
 public class CamionRuta : MonoBehaviour
 {
-    [Header("Avance (eje Z)")]
-    [SerializeField] float velocidadAvance = 12f;
+    [Header("Avance (eje Z) y curva de dificultad")]
+    [Tooltip("Velocidad al salir, en metros por segundo.")]
+    [SerializeField] float velocidadInicial = 10f;
+    [Tooltip("Velocidad a la que llega en los metros de metrosHastaMaxima.")]
+    [SerializeField] float velocidadMaxima = 20f;
+    [SerializeField] float metrosHastaMaxima = 380f;
+    [Tooltip("Cómo crece la velocidad con los metros recorridos: 0 es la salida y 1, metrosHastaMaxima.")]
+    [SerializeField] AnimationCurve curvaDificultad = AnimationCurve.Linear(0f, 0f, 1f, 1f);
 
     [Header("Carriles (eje X)")]
     [SerializeField] float anchoCarril = 3.2f;
@@ -32,10 +38,13 @@ public class CamionRuta : MonoBehaviour
     bool brincoPedido;
     bool brincando;
     bool detenido;
+    float salidaZ;
 
     public int Carril => carril;
     public bool Detenido => detenido;
     public bool EnElSuelo { get; private set; }
+    public float Metros => Mathf.Max(0f, cuerpo.position.z - salidaZ);
+    public float VelocidadActual { get; private set; }
 
     void Awake()
     {
@@ -44,6 +53,8 @@ public class CamionRuta : MonoBehaviour
         cuerpo.interpolation = RigidbodyInterpolation.Interpolate;
         cuerpo.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
         cuerpo.constraints = RigidbodyConstraints.FreezeRotation;
+        salidaZ = cuerpo.position.z;
+        VelocidadActual = velocidadInicial;
     }
 
     void Update()
@@ -96,7 +107,9 @@ public class CamionRuta : MonoBehaviour
         {
             vy = Mathf.Min(vy, subidaMaxima);
         }
-        cuerpo.linearVelocity = new Vector3(vx, vy, velocidadAvance);
+        float avance = curvaDificultad.Evaluate(Mathf.Clamp01(Metros / metrosHastaMaxima));
+        VelocidadActual = Mathf.Lerp(velocidadInicial, velocidadMaxima, avance);
+        cuerpo.linearVelocity = new Vector3(vx, vy, VelocidadActual);
     }
 
     // Los botones de la pantalla llaman a estos tres métodos.

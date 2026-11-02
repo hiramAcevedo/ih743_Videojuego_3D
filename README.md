@@ -21,6 +21,15 @@ autos parados. Guadalajara, Monterrey y Ciudad de México serán los niveles.
   camión se detiene y aparece el aviso; al llegar a la base termina el tramo de prueba.
 - **Cámara:** sigue al camión sólo en X y Z; su altura no cambia y su distancia en Z es fija (−15 m).
 
+## Lo que hay en la entrega 4.2
+
+- **Contador en pantalla:** arriba, al centro, un texto de UI con los metros que lleva el camión; sube parejo con su avance
+  en Z.
+- **Curva de dificultad:** el camión sale a 10 m/s y acelera con los metros recorridos hasta 20 m/s a los 380 m. Las tres
+  cifras y la forma de la curva (`AnimationCurve`) se ajustan en el Inspector, en el componente `CamionRuta`.
+- **Récord guardado:** la mejor distancia se guarda con `PlayerPrefs` al chocar, al llegar a la base o al volver al menú
+  desde la pausa, y aparece en el menú y debajo del contador.
+
 ## Controles
 
 - Teléfono: ◄ y ► cambian de carril, BRINCAR salta y PAUSA está arriba a la izquierda.
@@ -33,7 +42,8 @@ y Play.
 
 ## Estructura
 
-- `Assets/Scripts/`: `CamionRuta` (movimiento y colisiones), `CamaraSeguimiento`, `Navegacion` (escenas y paneles),
+- `Assets/Scripts/`: `CamionRuta` (movimiento, curva de dificultad y colisiones), `Marcador` (contador de metros y récord
+  con `PlayerPrefs`), `CamaraSeguimiento`, `Navegacion` (escenas y paneles),
   `AreaSegura`, `ContenidoVertical` (los paneles caben sin encimarse en cualquier
   proporción de pantalla), `Girar` y `TextoConProfundidad`.
 - `Assets/Scenes/`: `Menu` y `Ruta`.
