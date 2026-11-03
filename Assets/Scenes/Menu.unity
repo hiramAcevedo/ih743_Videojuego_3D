@@ -182,7 +182,7 @@ MonoBehaviour:
     m_FontStyle: 1
     m_BestFit: 0
     m_MinSize: 10
-    m_MaxSize: 40
+    m_MaxSize: 150
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
@@ -709,7 +709,7 @@ MonoBehaviour:
     m_FontStyle: 1
     m_BestFit: 0
     m_MinSize: 10
-    m_MaxSize: 40
+    m_MaxSize: 92
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
@@ -788,7 +788,7 @@ MonoBehaviour:
     m_FontStyle: 1
     m_BestFit: 0
     m_MinSize: 10
-    m_MaxSize: 40
+    m_MaxSize: 50
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
@@ -882,6 +882,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Girar
   gradosPorSegundo: 18
+--- !u!4 &576715067 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 170983778113026622, guid: 4a65f9017fe0f419ebbd02360a3115d9, type: 3}
+  m_PrefabInstance: {fileID: 576715064}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &614189174
 GameObject:
   m_ObjectHideFlags: 0
@@ -1132,7 +1137,7 @@ MonoBehaviour:
     m_FontStyle: 1
     m_BestFit: 0
     m_MinSize: 10
-    m_MaxSize: 40
+    m_MaxSize: 70
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
@@ -1211,7 +1216,7 @@ MonoBehaviour:
     m_FontStyle: 1
     m_BestFit: 0
     m_MinSize: 10
-    m_MaxSize: 40
+    m_MaxSize: 50
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
@@ -1519,7 +1524,7 @@ RectTransform:
   m_GameObject: {fileID: 1229493403}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.25, y: 0.25, z: 1}
+  m_LocalScale: {x: 0.25000003, y: 0.25000003, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 451086540}
@@ -1686,7 +1691,7 @@ MonoBehaviour:
     m_FontStyle: 1
     m_BestFit: 0
     m_MinSize: 10
-    m_MaxSize: 40
+    m_MaxSize: 56
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
@@ -1918,7 +1923,7 @@ MonoBehaviour:
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
-    m_MaxSize: 40
+    m_MaxSize: 50
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
@@ -1982,7 +1987,7 @@ MonoBehaviour:
     m_FontStyle: 1
     m_BestFit: 0
     m_MinSize: 10
-    m_MaxSize: 40
+    m_MaxSize: 52
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
@@ -2133,7 +2138,7 @@ RectTransform:
   m_GameObject: {fileID: 1700102910}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.25, y: 0.25, z: 1}
+  m_LocalScale: {x: 0.64951897, y: 0.64951897, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 182516470}
@@ -2443,6 +2448,7 @@ GameObject:
   - component: {fileID: 2034729695}
   - component: {fileID: 2034729697}
   - component: {fileID: 2034729696}
+  - component: {fileID: 2034729699}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -2568,6 +2574,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2034729699
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2034729694}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d31e8dd0393144986bd65a955109f9b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EncuadreExhibicion
+  exhibicion: {fileID: 576715067}
+  anchoMaximo: 0.8
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

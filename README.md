@@ -29,6 +29,8 @@ autos parados. Guadalajara, Monterrey y Ciudad de México serán los niveles.
   cifras y la forma de la curva (`AnimationCurve`) se ajustan en el Inspector, en el componente `CamionRuta`.
 - **Récord guardado:** la mejor distancia se guarda con `PlayerPrefs` al chocar, al llegar a la base o al volver al menú
   desde la pausa, y aparece en el menú y debajo del contador.
+- **Menú en vertical:** la cámara se aleja según la proporción de la pantalla para que el camión de exhibición quepa
+  completo mientras gira, en 9:16 y en 20:9; en horizontal se queda donde estaba.
 
 ## Controles
 
@@ -43,7 +45,8 @@ y Play.
 ## Estructura
 
 - `Assets/Scripts/`: `CamionRuta` (movimiento, curva de dificultad y colisiones), `Marcador` (contador de metros y récord
-  con `PlayerPrefs`), `CamaraSeguimiento`, `Navegacion` (escenas y paneles),
+  con `PlayerPrefs`), `CamaraSeguimiento`, `EncuadreExhibicion` (en vertical, la
+  cámara del menú se aleja hasta que el camión quepa completo), `Navegacion` (escenas y paneles),
   `AreaSegura`, `ContenidoVertical` (los paneles caben sin encimarse en cualquier
   proporción de pantalla), `Girar` y `TextoConProfundidad`.
 - `Assets/Scenes/`: `Menu` y `Ruta`.
