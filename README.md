@@ -23,6 +23,11 @@ autos parados. Guadalajara, Monterrey y Ciudad de México serán los niveles.
 
 ## Lo que hay en la entrega 4.2
 
+<p align="center">
+  <img src="docs/capturas/4.2-contador.png" width="270" alt="El contador marca 95 m en la avenida, en vertical">
+  <img src="docs/capturas/4.2-menu-record.png" width="270" alt="El menú con el récord de 103 m y el camión completo">
+</p>
+
 - **Contador en pantalla:** arriba, al centro, un texto de UI con los metros que lleva el camión; sube parejo con su avance
   en Z.
 - **Curva de dificultad:** el camión sale a 10 m/s y acelera con los metros recorridos hasta 20 m/s a los 380 m. Las tres
