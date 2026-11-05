@@ -10,10 +10,10 @@ using UnityEngine.InputSystem;
 public class CamionRuta : MonoBehaviour
 {
     [Header("Avance (eje Z) y curva de dificultad")]
-    [Tooltip("Velocidad al salir, en metros por segundo.")]
-    [SerializeField] float velocidadInicial = 10f;
-    [Tooltip("Velocidad a la que llega en los metros de metrosHastaMaxima.")]
-    [SerializeField] float velocidadMaxima = 20f;
+    [Tooltip("Velocidad al salir, en km/h.")]
+    [SerializeField] float velocidadInicial = 36f;
+    [Tooltip("Velocidad en km/h a la que llega en los metros de metrosHastaMaxima.")]
+    [SerializeField] float velocidadMaxima = 72f;
     [SerializeField] float metrosHastaMaxima = 380f;
     [Tooltip("Cómo crece la velocidad con los metros recorridos: 0 es la salida y 1, metrosHastaMaxima.")]
     [SerializeField] AnimationCurve curvaDificultad = AnimationCurve.Linear(0f, 0f, 1f, 1f);
@@ -32,6 +32,8 @@ public class CamionRuta : MonoBehaviour
     [Header("Avisos")]
     [SerializeField] Navegacion navegacion;
 
+    const float KmhPorMetroPorSegundo = 3.6f;   // Unity mide la velocidad en metros por segundo
+
     Rigidbody cuerpo;
     BoxCollider caja;
     int carril;              // -1 izquierda, 0 centro, 1 derecha
@@ -44,7 +46,7 @@ public class CamionRuta : MonoBehaviour
     public bool Detenido => detenido;
     public bool EnElSuelo { get; private set; }
     public float Metros => Mathf.Max(0f, cuerpo.position.z - salidaZ);
-    public float VelocidadActual { get; private set; }
+    public float VelocidadActual { get; private set; }   // en km/h
 
     void Awake()
     {
@@ -109,7 +111,7 @@ public class CamionRuta : MonoBehaviour
         }
         float avance = curvaDificultad.Evaluate(Mathf.Clamp01(Metros / metrosHastaMaxima));
         VelocidadActual = Mathf.Lerp(velocidadInicial, velocidadMaxima, avance);
-        cuerpo.linearVelocity = new Vector3(vx, vy, VelocidadActual);
+        cuerpo.linearVelocity = new Vector3(vx, vy, VelocidadActual / KmhPorMetroPorSegundo);
     }
 
     // Los botones de la pantalla llaman a estos tres métodos.

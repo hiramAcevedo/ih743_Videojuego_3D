@@ -95,8 +95,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 272e5b934948d4b71b6e32e57468269c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CamionRuta
-  velocidadInicial: 10
-  velocidadMaxima: 20
+  velocidadInicial: 36
+  velocidadMaxima: 72
   metrosHastaMaxima: 380
   curvaDificultad:
     serializedVersion: 2
