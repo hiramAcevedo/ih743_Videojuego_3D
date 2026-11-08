@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 //   Z  avanza solo por la avenida, cada vez más rápido según los metros recorridos (la curva de dificultad);
 //   X  cambia entre tres carriles con las flechas, A y D o los botones de la pantalla;
 //   Y  brinca con la barra, W, flecha arriba o el botón BRINCAR, y sube y baja al pasar los topes.
-// Si choca con un obstáculo se detiene y avisa a la navegación; si llega a la base, termina el tramo de prueba.
+// Si choca con un obstáculo se detiene y lo avisa con el evento Choco; ControlPartida lo regresa a la salida con Reiniciar.
 [RequireComponent(typeof(Rigidbody))]
 public class CamionRuta : MonoBehaviour
 {
@@ -42,11 +42,14 @@ public class CamionRuta : MonoBehaviour
     bool detenido;
     float salidaZ;
 
+    public event System.Action Choco;
+
     public int Carril => carril;
     public bool Detenido => detenido;
     public bool EnElSuelo { get; private set; }
     public float Metros => Mathf.Max(0f, cuerpo.position.z - salidaZ);
     public float VelocidadActual { get; private set; }   // en km/h
+    public Vector3 PosicionSalida { get; private set; }
 
     void Awake()
     {
@@ -55,7 +58,8 @@ public class CamionRuta : MonoBehaviour
         cuerpo.interpolation = RigidbodyInterpolation.Interpolate;
         cuerpo.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
         cuerpo.constraints = RigidbodyConstraints.FreezeRotation;
-        salidaZ = cuerpo.position.z;
+        PosicionSalida = cuerpo.position;
+        salidaZ = PosicionSalida.z;
         VelocidadActual = velocidadInicial;
     }
 
@@ -144,27 +148,26 @@ public class CamionRuta : MonoBehaviour
             Quaternion.identity, distanciaSuelo, ~0, QueryTriggerInteraction.Ignore);
     }
 
+    // Vuelve a la salida en el carril central, con la velocidad inicial, para empezar otra partida.
+    public void Reiniciar()
+    {
+        detenido = false;
+        brincoPedido = false;
+        brincando = false;
+        carril = 0;
+        VelocidadActual = velocidadInicial;
+        cuerpo.linearVelocity = Vector3.zero;
+        cuerpo.position = PosicionSalida;
+        transform.position = PosicionSalida;
+        Physics.SyncTransforms();
+    }
+
     void OnCollisionEnter(Collision choque)
     {
         if (!detenido && choque.collider.CompareTag("Obstaculo"))
         {
             detenido = true;
-            if (navegacion != null)
-            {
-                navegacion.MostrarChoque();
-            }
-        }
-    }
-
-    void OnTriggerEnter(Collider otro)
-    {
-        if (!detenido && otro.CompareTag("Finish"))
-        {
-            detenido = true;
-            if (navegacion != null)
-            {
-                navegacion.MostrarFin();
-            }
+            Choco?.Invoke();
         }
     }
 }

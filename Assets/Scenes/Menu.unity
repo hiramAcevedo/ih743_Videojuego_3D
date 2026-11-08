@@ -1740,7 +1740,6 @@ MonoBehaviour:
   panelInstrucciones: {fileID: 438194497}
   panelPausa: {fileID: 0}
   panelChoque: {fileID: 0}
-  panelFin: {fileID: 0}
   controles: {fileID: 0}
 --- !u!4 &1454088334
 Transform:
@@ -1930,9 +1929,10 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "El cami\xF3n avanza solo por la avenida\ny acelera mientras m\xE1s lejos
-    llega.\n\n\u25C4  \u25BA  cambian de carril.\nBRINCAR salta los topes.\n\nNo
-    choques con los autos parados:\nllega hasta la base. Tu mejor distancia\nqueda
+  m_Text: "El cami\xF3n avanza solo por una avenida\nque no se acaba y acelera mientras\nm\xE1s
+    lejos llega. El tr\xE1fico tambi\xE9n\ncrece: ligero, medio y hora pico.\n\n\u25C4 
+    \u25BA  cambian de carril.\nBRINCAR salta los topes.\n\nNo choques con los autos
+    parados.\nSi chocas, JUGAR DE NUEVO te regresa\na la salida. Tu mejor distancia\nqueda
     guardada como r\xE9cord.\n\nEn computadora: flechas o A y D para el carril, barra
     o W para brincar."
 --- !u!222 &1558880014
@@ -2288,6 +2288,11 @@ MonoBehaviour:
   camion: {fileID: 0}
   textoMetros: {fileID: 0}
   textoRecord: {fileID: 1607676831}
+  generador: {fileID: 0}
+  textoEtapa: {fileID: 0}
+  segundosResaltada: 2.5
+  colorEtapa: {r: 0.9411765, g: 0.9411765, b: 0.9254902, a: 1}
+  colorEtapaNueva: {r: 1, g: 0.76862746, b: 0.15686275, a: 1}
 --- !u!4 &1818517811
 Transform:
   m_ObjectHideFlags: 0

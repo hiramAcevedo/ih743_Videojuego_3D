@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc0a86ecd74874cca9dc9ca33729cef9, type: 3}
+  m_Name: 3 Hora pico
+  m_EditorClassIdentifier: Assembly-CSharp::EtapaAvenida
+  nombre: Hora pico
+  desdeMetro: 600
+  porciones:
+  - nombre: Cuadra de casas A
+    prefab: {fileID: 5591714364951297924, guid: 44e399fd5a5f6460391aa09bacdb7716, type: 3}
+    peso: 1
+  - nombre: Cuadra de casas B
+    prefab: {fileID: 7413540012744080880, guid: a1892fab603824fd6906682067d65d20, type: 3}
+    peso: 1
+  - nombre: Cuadra de comercios A
+    prefab: {fileID: 1755006023805411817, guid: 261f670c205924d82b88eaca9b6a3077, type: 3}
+    peso: 2
+  - nombre: Cuadra de comercios B
+    prefab: {fileID: 5481829475780450611, guid: e1db16312a8044753add7487b547b1ce, type: 3}
+    peso: 2
+  - nombre: Cruce con paso peatonal
+    prefab: {fileID: 7960625106566290579, guid: 5897a9554f6f8429585315145d400b61, type: 3}
+    peso: 4
+  separacionMinima: 18
+  separacionMaxima: 26
+  probabilidadDosAutos: 0.6
+  probabilidadTope: 0.3

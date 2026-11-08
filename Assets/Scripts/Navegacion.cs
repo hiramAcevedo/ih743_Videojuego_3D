@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 // La navegación entre escenas y paneles. En el menú: jugar, cómo se juega y salir. En la avenida: pausa (detiene el
-// tiempo), continuar, volver al menú, y los avisos de choque y de llegada a la base.
+// tiempo), continuar, volver al menú y el aviso de choque, que ControlPartida llena y desde el que se juega de nuevo.
 public class Navegacion : MonoBehaviour
 {
     public const string EscenaMenu = "Menu";
@@ -12,7 +12,6 @@ public class Navegacion : MonoBehaviour
     [SerializeField] GameObject panelInstrucciones;
     [SerializeField] GameObject panelPausa;
     [SerializeField] GameObject panelChoque;
-    [SerializeField] GameObject panelFin;
     [SerializeField] GameObject controles;
 
     public bool EnPausa { get; private set; }
@@ -41,7 +40,10 @@ public class Navegacion : MonoBehaviour
         Mostrar(panelPausa);
     }
 
-    public void Continuar()
+    public void Continuar() => MostrarJuego();
+
+    // El HUD y los controles, con el tiempo corriendo: al continuar desde la pausa y al empezar otra partida.
+    public void MostrarJuego()
     {
         EnPausa = false;
         Time.timeScale = 1f;
@@ -49,7 +51,6 @@ public class Navegacion : MonoBehaviour
     }
 
     public void MostrarChoque() => Mostrar(panelChoque);
-    public void MostrarFin() => Mostrar(panelFin);
 
     public void Salir()
     {
@@ -63,7 +64,7 @@ public class Navegacion : MonoBehaviour
     // Deja visible sólo el panel pedido; los controles del camión se ven únicamente mientras se maneja.
     void Mostrar(GameObject panel)
     {
-        foreach (var p in new[] { panelPrincipal, panelInstrucciones, panelPausa, panelChoque, panelFin })
+        foreach (var p in new[] { panelPrincipal, panelInstrucciones, panelPausa, panelChoque })
         {
             if (p != null)
             {

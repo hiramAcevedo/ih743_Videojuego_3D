@@ -17,11 +17,15 @@ public class CamaraSeguimiento : MonoBehaviour
     public float Altura => altura;
     public float DistanciaZ => distanciaZ;
 
-    void Start()
+    void Start() => Colocar();
+
+    // Pone la cámara de golpe en su lugar detrás del camión, sin suavizado: al empezar y al jugar de nuevo.
+    public void Colocar()
     {
         if (objetivo != null)
         {
             transform.position = new Vector3(objetivo.position.x + desplazamientoX, altura, objetivo.position.z + distanciaZ);
+            velocidadX = 0f;
         }
     }
 
