@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 7739219551865860984}
   m_Layer: 0
   m_Name: Tope
-  m_TagString: Untagged
+  m_TagString: Tope
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

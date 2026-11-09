@@ -3,9 +3,10 @@ using UnityEngine.InputSystem;
 
 // El camión de ruta, personaje principal. Se mueve en los tres ejes con su Rigidbody:
 //   Z  avanza solo por la avenida, cada vez más rápido según los metros recorridos (la curva de dificultad), de 36 km/h a un
-//      tope de 110 km/h;
+//      tope de 200 km/h;
 //   X  cambia entre tres carriles con las flechas, A y D o los botones de la pantalla;
-//   Y  brinca con la barra, W, flecha arriba o el botón BRINCAR, y sube y baja al pasar los topes.
+//   Y  brinca con la barra, W, flecha arriba o el botón BRINCAR, y sube y baja al pasar los topes; desde 120 km/h hay que
+//      brincarlos: pasar uno sin brincar lo avisa con el evento TopeSinBrincar (ControlPartida le quita una vida y lo frena).
 // Si choca con un obstáculo se detiene y lo avisa con el evento Choco; ControlPartida lo regresa a la salida con Reiniciar.
 [RequireComponent(typeof(Rigidbody))]
 public class CamionRuta : MonoBehaviour
@@ -14,11 +15,12 @@ public class CamionRuta : MonoBehaviour
     [Tooltip("Velocidad al salir, en km/h.")]
     [SerializeField] float velocidadInicial = 36f;
     [Tooltip("El tope: velocidad en km/h a la que llega en los metros de metrosHastaMaxima. De ahí ya no sube.")]
-    [SerializeField] float velocidadMaxima = 110f;
+    [SerializeField] float velocidadMaxima = 200f;
     [Tooltip("Metros recorridos en los que llega al tope de velocidad.")]
-    [SerializeField] float metrosHastaMaxima = 1500f;
+    [SerializeField] float metrosHastaMaxima = 5000f;
     [Tooltip("Cómo crece la velocidad con los metros recorridos: 0 es la salida y 1, metrosHastaMaxima. Sube rápido al principio " +
-             "(72 km/h a los 380 m) y luego más despacio (95 km/h a los 1,000 m) hasta el tope.")]
+             "(72 km/h a los 380 m), luego más despacio (95 km/h a los 1,000 m, 110 a los 1,500 m) y sigue parejo, unos 2.5 km/h " +
+             "cada 100 m (150 km/h a los 3,000 m), hasta el tope.")]
     [SerializeField] AnimationCurve curvaDificultad = AnimationCurve.Linear(0f, 0f, 1f, 1f);
 
     [Header("Carriles (eje X)")]
@@ -31,6 +33,10 @@ public class CamionRuta : MonoBehaviour
     [SerializeField] float distanciaSuelo = 0.25f;
     [Tooltip("Lo más que puede subir el camión sin brincar: al pasar un tope, la rampa lo levanta y no lo lanza.")]
     [SerializeField] float subidaMaxima = 2.2f;
+    [Tooltip("Desde esta velocidad, en km/h, pasar un tope sin brincar cuesta una vida.")]
+    [SerializeField] float brincoObligatorioDesde = 120f;
+    [Tooltip("Después de frenar por un tope, cuántos km/h por segundo recupera hasta volver a la curva de dificultad.")]
+    [SerializeField, Min(1f)] float recuperacionKmhPorSegundo = 25f;
 
     [Header("Avisos")]
     [SerializeField] Navegacion navegacion;
@@ -47,6 +53,7 @@ public class CamionRuta : MonoBehaviour
     float ordenZ;            // la velocidad hacia adelante que se pidió en el paso anterior, en m/s
 
     public event System.Action Choco;
+    public event System.Action TopeSinBrincar;
 
     public int Carril => carril;
     public bool Detenido => detenido;
@@ -54,7 +61,8 @@ public class CamionRuta : MonoBehaviour
     public float Metros => Mathf.Max(0f, cuerpo.position.z - salidaZ);
     public float VelocidadActual { get; private set; }   // en km/h
     public Vector3 PosicionSalida { get; private set; }
-    public Collider UltimoChoque { get; private set; }   // con qué chocó: un auto parado o uno que venía rebasando
+    public Collider UltimoChoque { get; private set; }   // con qué chocó: un auto parado, uno que venía rebasando o un tope
+    public Collider UltimoTope { get; private set; }     // el último tope que pasó sin brincar a más de 120 km/h
 
     void Awake()
     {
@@ -124,7 +132,8 @@ public class CamionRuta : MonoBehaviour
                 vy = subidaMaxima;
             }
         }
-        VelocidadActual = VelocidadEn(Metros);
+        // La curva manda; si un tope lo frenó, recupera poco a poco hasta alcanzarla otra vez.
+        VelocidadActual = Mathf.Min(VelocidadEn(Metros), VelocidadActual + recuperacionKmhPorSegundo * Time.fixedDeltaTime);
         ordenZ = VelocidadActual / KmhPorMetroPorSegundo;
         cuerpo.linearVelocity = new Vector3(vx, vy, ordenZ);
     }
@@ -134,6 +143,24 @@ public class CamionRuta : MonoBehaviour
     public float VelocidadEn(float metros)
     {
         return Mathf.Lerp(velocidadInicial, velocidadMaxima, curvaDificultad.Evaluate(Mathf.Clamp01(metros / metrosHastaMaxima)));
+    }
+
+    // Baja la velocidad de golpe, como al pegar en un tope sin brincar; luego la recupera.
+    public void Frenar(float kmh)
+    {
+        VelocidadActual = Mathf.Min(VelocidadActual, kmh);
+    }
+
+    // Termina la partida como un choque: con un obstáculo o al quedarse sin vidas en un tope.
+    public void Detener(Collider causa)
+    {
+        if (detenido)
+        {
+            return;
+        }
+        detenido = true;
+        UltimoChoque = causa;
+        Choco?.Invoke();
     }
 
     // Los botones de la pantalla llaman a estos tres métodos.
@@ -171,6 +198,7 @@ public class CamionRuta : MonoBehaviour
     {
         detenido = false;
         UltimoChoque = null;
+        UltimoTope = null;
         brincoPedido = false;
         brincando = false;
         carril = 0;
@@ -184,11 +212,19 @@ public class CamionRuta : MonoBehaviour
 
     void OnCollisionEnter(Collision choque)
     {
-        if (!detenido && choque.collider.CompareTag("Obstaculo"))
+        if (detenido)
         {
-            detenido = true;
-            UltimoChoque = choque.collider;
-            Choco?.Invoke();
+            return;
+        }
+        if (choque.collider.CompareTag("Obstaculo"))
+        {
+            Detener(choque.collider);
+        }
+        else if (choque.collider.CompareTag("Tope") && choque.collider != UltimoTope && !brincando && VelocidadActual >= brincoObligatorioDesde)
+        {
+            // Cada tope cuesta una vida como mucho, aunque el camión lo vuelva a tocar al pasarlo.
+            UltimoTope = choque.collider;
+            TopeSinBrincar?.Invoke();
         }
     }
 }

@@ -27,6 +27,9 @@ public class GeneradorAvenida : MonoBehaviour
              "de un auto, a la velocidad del camión). Si son menos, el carril libre de una fila de dos autos queda a un solo cambio " +
              "de algún carril libre de la fila anterior: nunca hay que cruzar dos carriles de golpe.")]
     [SerializeField, Min(0f)] float segundosParaDosCarriles = 0.6f;
+    [Tooltip("Segundos que siempre quedan para pasarse al carril de junto entre una fila y la siguiente: a más velocidad, las " +
+             "filas se separan más metros que los de la etapa si hace falta.")]
+    [SerializeField, Min(0f)] float segundosMinimosEntreFilas = 0.3f;
 
     [Header("Autos que rebasan")]
     [Tooltip("Prefabs de los autos que vienen por detrás a rebasar al camión; cada uno trae su AutoQueRebasa. Cuántos salen lo " +
@@ -193,7 +196,9 @@ public class GeneradorAvenida : MonoBehaviour
         {
             var etapaFila = EtapaEn(zFila - origenZ);
             CrearFila(tramo, zFila, etapaFila);
-            zFila += Mathf.Lerp(etapaFila.separacionMinima, etapaFila.separacionMaxima, (float)azar.NextDouble());
+            float separacion = Mathf.Lerp(etapaFila.separacionMinima, etapaFila.separacionMaxima, (float)azar.NextDouble());
+            float minima = LargoCamionYAuto + camion.VelocidadEn(zFila - origenZ) / 3.6f * segundosMinimosEntreFilas;
+            zFila += Mathf.Max(separacion, minima);
         }
         tramos.Enqueue(tramo);
         zTramo = fin;

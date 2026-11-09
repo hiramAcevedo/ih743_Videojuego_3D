@@ -96,8 +96,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CamionRuta
   velocidadInicial: 36
-  velocidadMaxima: 110
-  metrosHastaMaxima: 1500
+  velocidadMaxima: 200
+  metrosHastaMaxima: 5000
   curvaDificultad:
     serializedVersion: 2
     m_Curve:
@@ -105,25 +105,43 @@ MonoBehaviour:
       time: 0
       value: 0
       inSlope: 0
-      outSlope: 1.9203415
+      outSlope: 2.8883185
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
-      time: 0.25333333
-      value: 0.4864865
-      inSlope: 1.9203415
-      outSlope: 0.7519616
+      time: 0.076
+      value: 0.2195122
+      inSlope: 2.8883185
+      outSlope: 1.1309993
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
-      time: 0.6666667
-      value: 0.7972973
-      inSlope: 0.7519616
-      outSlope: 0.60810816
+      time: 0.2
+      value: 0.3597561
+      inSlope: 1.1309993
+      outSlope: 0.9146338
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.3
+      value: 0.4512195
+      inSlope: 0.9146338
+      outSlope: 0.8130081
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.6
+      value: 0.69512194
+      inSlope: 0.8130081
+      outSlope: 0.76219517
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
@@ -131,7 +149,7 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 1
       value: 1
-      inSlope: 0.60810816
+      inSlope: 0.76219517
       outSlope: 0
       tangentMode: 0
       weightedMode: 0
@@ -146,6 +164,8 @@ MonoBehaviour:
   impulsoBrinco: 6.5
   distanciaSuelo: 0.25
   subidaMaxima: 2.2
+  brincoObligatorioDesde: 120
+  recuperacionKmhPorSegundo: 25
   navegacion: {fileID: 0}
 --- !u!1001 &6544528200681358436
 PrefabInstance:

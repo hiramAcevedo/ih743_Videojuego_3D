@@ -1894,7 +1894,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 60}
-  m_SizeDelta: {x: 960, y: 1000}
+  m_SizeDelta: {x: 960, y: 1100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1558880013
 MonoBehaviour:
@@ -1930,12 +1930,13 @@ MonoBehaviour:
     m_VerticalOverflow: 1
     m_LineSpacing: 1
   m_Text: "El cami\xF3n avanza solo por una avenida\nque no se acaba y acelera mientras\nm\xE1s
-    lejos llega, de 36 a 110 km/h.\nEl tr\xE1fico crece en cuatro etapas:\nligero,
+    lejos llega, de 36 a 200 km/h.\nEl tr\xE1fico crece en cuatro etapas:\nligero,
     medio, hora pico y quincena.\n\n\u25C4  \u25BA  cambian de carril.\nBRINCAR salta
-    los topes.\n\nNo choques con los autos parados ni\ncon los que te rebasan y se
-    te cierran.\nSi chocas, JUGAR DE NUEVO te regresa\na la salida. Tu mejor distancia\nqueda
-    guardada como r\xE9cord.\n\nEn computadora: flechas o A y D para el carril, barra
-    o W para brincar."
+    los topes. Desde 120 km/h,\nun tope sin brincar te quita una de\ntus 3 vidas
+    y te frena.\n\nNo choques con los autos parados ni\ncon los que te rebasan y
+    se te cierran.\nSi chocas, JUGAR DE NUEVO te regresa\na la salida; tu r\xE9cord
+    queda guardado.\n\nEn computadora: flechas o A y D para el carril, barra o W
+    para brincar."
 --- !u!222 &1558880014
 CanvasRenderer:
   m_ObjectHideFlags: 0
