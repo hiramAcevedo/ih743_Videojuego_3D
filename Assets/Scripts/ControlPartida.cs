@@ -118,13 +118,30 @@ public class ControlPartida : MonoBehaviour
         }
         if (textoDetalle != null)
         {
-            var con = camion.UltimoChoque;
-            textoDetalle.text = con != null && con.CompareTag("Tope") ? "Te quedaste sin vidas en los topes."
-                : con != null && con.GetComponentInParent<AutoQueRebasa>() != null ? "Un auto que te venía rebasando se te cerró."
-                : "Un auto parado te cerró el paso.";
+            textoDetalle.text = QuienSeMovio(camion.UltimoChoque);
         }
         Avisar("");
         navegacion.MostrarChoque();
+    }
+
+    // Con qué chocó y quién se movió: así se sabe si fue culpa del camión o del auto que rebasaba.
+    string QuienSeMovio(Collider con)
+    {
+        if (con != null && con.CompareTag("Tope"))
+        {
+            return "Te quedaste sin vidas en los topes.";
+        }
+        var auto = con != null ? con.GetComponentInParent<AutoQueRebasa>() : null;
+        if (auto == null)
+        {
+            return "Un auto parado te cerró el paso.";
+        }
+        if (auto.EstadoActual == AutoQueRebasa.Estado.Cambiando)
+        {
+            return "Un auto que te venía rebasando se te cerró.";
+        }
+        return camion.CambiandoDeCarril ? "Te le cerraste a un auto que te rebasaba."
+            : "Alcanzaste a un auto que te había rebasado.";
     }
 
     // Lo que hace el botón JUGAR DE NUEVO.

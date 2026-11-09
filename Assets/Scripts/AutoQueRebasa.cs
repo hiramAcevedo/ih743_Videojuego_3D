@@ -1,34 +1,35 @@
 using UnityEngine;
 
-// Un auto que viene por detrás, más rápido que el camión, por el carril de al lado: lo rebasa, pone la direccional, se le mete
-// adelante y frena mientras el camión siga detrás de él, así que hay que esquivarlo; en cuanto el camión se cambia de carril,
-// acelera y se va. Sólo se mete si va más rápido que el camión y le cabe delante, y sólo frena si le deja al menos 0.4 s. Si su carril nuevo es el único libre de una fila cercana, se mete sin frenar, para no dejar al camión sin
-// salida. Mientras rebasa, si se topa con un auto parado en su carril se cambia a otro libre (nunca al del camión si
-// todavía no lo pasa) y, si no hay, frena detrás: el que choca siempre es el camión. Lo saca GeneradorAvenida según los autos
-// por kilómetro de cada etapa y lo quita cuando queda lejos. Se mueve con un Rigidbody cinemático para que el camión sí lo choque.
+// Un auto que viene por detrás, más rápido que el camión, por el carril de al lado, y lo rebasa sin meterse con él. Hay dos:
+//   el tranquilo rebasa, busca su lugar y ahí se queda: si se topa con un auto parado, se pasa a un carril libre que no sea el
+//   del camión o se forma detrás;
+//   el loco (desde los 2,500 m) pasa mucho más rápido, se abre paso entre los autos parados y se pierde de vista.
+// Ninguno se cambia al carril del camión cerca de él ni frena delante de él; si el camión se le mete enfrente, frena detrás.
+// Lo saca GeneradorAvenida según los autos por kilómetro de cada etapa y lo quita cuando queda lejos. Se mueve con un Rigidbody
+// cinemático para que el camión sí lo choque si se le echa encima de lado.
+// Guardada para cuando exista el freno (4.4): la maniobra de meterse delante del camión y frenar está en el commit ea17497 de
+// este archivo (CabeDelante, CorredorLibre y frenaDelante). Sin freno, un auto que se mete lento deja al camión sin salida.
 [RequireComponent(typeof(Rigidbody))]
 public class AutoQueRebasa : MonoBehaviour
 {
-    public enum Estado { Rebasando, Direccional, Cambiando, Adelante, Atras }
+    public enum Estado { Rebasando, Direccional, Cambiando, Formado }
 
     [Header("Rebase")]
-    [Tooltip("Cuánto más rápido que el camión va mientras lo rebasa, en km/h.")]
+    [Tooltip("Cuánto más rápido que el camión va el tranquilo, en km/h.")]
     [SerializeField, Min(5f)] float ventajaKmh = 45f;
-    [Tooltip("Metros entre la trompa del camión y la cajuela del auto para empezar a meterse.")]
-    [SerializeField, Min(0f)] float adelanteParaMeterse = 4f;
-    [Tooltip("Segundos de anticipación con que ve un auto parado en su carril para cambiarse a otro mientras rebasa.")]
+    [Tooltip("Cuánto más rápido que el camión va el loco, en km/h.")]
+    [SerializeField, Min(5f)] float ventajaLocoKmh = 90f;
+    [Tooltip("Segundos de anticipación con que ve un auto parado en su carril para cambiarse a otro.")]
     [SerializeField, Min(0.2f)] float segundosParaEsquivar = 1.2f;
     [Tooltip("Segundos con la direccional prendida antes de cambiarse de carril.")]
-    [SerializeField, Min(0f)] float segundosDireccional = 0.5f;
+    [SerializeField, Min(0f)] float segundosDireccional = 0.4f;
     [Tooltip("Segundos que tarda en pasarse al otro carril.")]
-    [SerializeField, Min(0.1f)] float segundosCambio = 0.6f;
-    [Tooltip("Ya adelante del camión y en su carril, frena hasta esta parte de la velocidad del camión: el camión lo alcanza y hay " +
-             "que esquivarlo. Si el camión se cambia de carril, vuelve a acelerar y se va.")]
-    [SerializeField, Range(0.3f, 1f)] float frenaHasta = 0.68f;
-    [Tooltip("Qué tan fuerte acelera o frena al rebasar y al meterse, en m/s².")]
+    [SerializeField, Min(0.1f)] float segundosCambio = 0.5f;
+    [Tooltip("Metros alrededor del camión (adelante y atrás) en los que nunca se cambia a su carril.")]
+    [SerializeField, Min(0f)] float distanciaRespeto = 60f;
+    [Tooltip("Qué tan fuerte acelera, en m/s².")]
     [SerializeField, Min(1f)] float aceleracion = 8f;
-    [Tooltip("Qué tan fuerte frena cuando tiene un auto parado o el camión enfrente, en m/s²: frena tarde, como quien piensa " +
-             "cambiarse de carril antes.")]
+    [Tooltip("Qué tan fuerte frena cuando tiene un auto parado o el camión enfrente, en m/s².")]
     [SerializeField, Min(1f)] float frenadoFuerte = 14f;
 
     [Header("Direccionales")]
@@ -39,17 +40,12 @@ public class AutoQueRebasa : MonoBehaviour
 
     const float MedioLargo = 2.15f;        // el auto mide 4.3 m de largo
     const float MedioLargoCamion = 4.3f;   // y el camión, 8.6 m
-    const float Separacion = 3f;           // los metros que deja al frenar detrás de algo
-    const float SegundosParaFrenar = 0.4f; // sólo frena delante del camión si le deja al menos este tiempo de distancia
-    const float SegundosDeCorredor = 2.5f; // al meterse al carril del camión, lo que ese carril tiene que estar sin autos parados
+    const float Separacion = 1f;           // los metros que deja al formarse detrás de un auto parado
 
     Rigidbody cuerpo;
     CamionRuta camion;
-    GeneradorAvenida generador;
-    bool frenaDelante;                     // si al quedar delante del camión frena; no, si estorbaría el único carril libre
-    bool frenaAlMeterse;                   // lo que valdrá frenaDelante cuando termine de meterse
-    Estado estadoAntes;                    // a dónde vuelve si desiste de cambiarse de carril
     Rigidbody cuerpoCamion;
+    GeneradorAvenida generador;
     float anchoCarril;
     int limite;                            // el carril de la orilla: con tres carriles, -1 y 1
     int carril;
@@ -62,24 +58,15 @@ public class AutoQueRebasa : MonoBehaviour
     float velocidadDeEnfrente;             // la velocidad de eso, en m/s: 0 si es un auto parado
 
     public Estado EstadoActual { get; private set; }
+    public bool Loco { get; private set; }
     public int Carril => carril;
     public int CarrilDestino => carrilDestino;
     public float VelocidadKmh => velocidad * 3.6f;
     public float AvanceCambio => EstadoActual == Estado.Cambiando ? Mathf.Clamp01(tiempoEnEstado / segundosCambio) : 0f;
     public bool DireccionalPrendida { get; private set; }
-    public bool SeMetioAlCarrilDelCamion { get; private set; }
-    public bool CambioHaciaElCamion { get; private set; }   // el cambio de carril en curso va al carril del camión
 
     float VelocidadCamion => camion.VelocidadActual / 3.6f;
-
-    // Hasta dónde llega su trompa, en metros delante del centro del camión, cuando termina de rebasarlo y pone la direccional,
-    // si sale "detras" metros atrás y el camión va a "velocidadCamion" m/s. El generador revisa que ese tramo de su carril esté
-    // sin autos parados antes de sacarlo, para que no se atore a medio rebase.
-    public float MetrosParaRebasar(float velocidadCamion, float detras)
-    {
-        float segundos = (detras + MedioLargoCamion + adelanteParaMeterse + MedioLargo) / (ventajaKmh / 3.6f);
-        return MedioLargoCamion + adelanteParaMeterse + 2f * MedioLargo + velocidadCamion * segundos;
-    }
+    float Ventaja => (Loco ? ventajaLocoKmh : ventajaKmh) / 3.6f;
 
     void Awake()
     {
@@ -91,8 +78,18 @@ public class AutoQueRebasa : MonoBehaviour
         PrenderDireccionales(0);
     }
 
+    // Hasta dónde llega su trompa, en metros delante del centro del camión, cuando termina de pasarlo (su cajuela 4 m delante de
+    // la trompa del camión), si sale "detras" metros atrás y el camión va a "velocidadCamion" m/s. El generador revisa que ese
+    // tramo de su carril esté sin autos parados antes de sacarlo, para que no se atore a medio rebase.
+    public float MetrosParaRebasar(float velocidadCamion, float detras, bool loco)
+    {
+        float ventaja = (loco ? ventajaLocoKmh : ventajaKmh) / 3.6f;
+        float segundos = (detras + MedioLargoCamion + 4f + MedioLargo) / ventaja;
+        return MedioLargoCamion + 4f + 2f * MedioLargo + velocidadCamion * segundos;
+    }
+
     // Lo llama el generador al sacarlo detrás del camión, en un carril de junto.
-    public void Arrancar(CamionRuta camionQueRebasa, GeneradorAvenida generadorDeLaAvenida, int carrilInicial, float ancho, int carriles)
+    public void Arrancar(CamionRuta camionQueRebasa, GeneradorAvenida generadorDeLaAvenida, int carrilInicial, float ancho, int carriles, bool loco)
     {
         generador = generadorDeLaAvenida;
         limite = carriles / 2;
@@ -100,7 +97,8 @@ public class AutoQueRebasa : MonoBehaviour
         cuerpoCamion = camion.GetComponent<Rigidbody>();
         carril = carrilDestino = carrilInicial;
         anchoCarril = ancho;
-        velocidad = VelocidadCamion + ventajaKmh / 3.6f;
+        Loco = loco;
+        velocidad = VelocidadCamion + Ventaja;
         Cambiar(Estado.Rebasando);
     }
 
@@ -113,43 +111,30 @@ public class AutoQueRebasa : MonoBehaviour
         float dt = Time.fixedDeltaTime;
         tiempoEnEstado += dt;
         var pos = cuerpo.position;
-        float zCamion = cuerpoCamion.position.z;
-        float vc = VelocidadCamion;
-        float rebase = vc + ventajaKmh / 3.6f;
-        float objetivo = rebase;
+        float objetivo = VelocidadCamion + Ventaja;
         MirarAdelante(pos);
         switch (EstadoActual)
         {
             case Estado.Rebasando:
-                float adelante = pos.z - MedioLargo - (zCamion + MedioLargoCamion);
-                if (adelante > adelanteParaMeterse + 24f)
-                {
-                    // No encontró hueco para meterse: sigue de largo.
-                    SeMetioAlCarrilDelCamion = carril == camion.Carril;
-                    frenaDelante = false;
-                    Cambiar(Estado.Adelante);
-                    break;
-                }
-                if (adelante >= adelanteParaMeterse && BuscarHueco(pos))
-                {
-                    break;   // ya pone la direccional para meterse
-                }
                 if (velocidadDeEnfrente < 1f && cerca < 6f + velocidad * segundosParaEsquivar)
                 {
-                    Esquivar(pos, adelante >= adelanteParaMeterse);
+                    Esquivar(pos);
+                }
+                if (EstadoActual == Estado.Rebasando && velocidad < 0.3f && velocidadDeEnfrente < 1f && cerca < Separacion + 1f)
+                {
+                    Cambiar(Estado.Formado);   // encontró su lugar detrás de un auto parado y ahí se queda
                 }
                 break;
             case Estado.Direccional:
                 Parpadear();
                 if (tiempoEnEstado >= segundosDireccional)
                 {
-                    if (carrilDestino == camion.Carril && !CabeDelante(pos))
+                    if (!PuedeIrA(carrilDestino, pos))
                     {
-                        // Mientras ponía la direccional frenó o el camión lo alcanzó: ya no cabe delante, desiste.
+                        // Mientras ponía la direccional cambió algo (el camión se acercó o se ocupó el carril): desiste.
                         PrenderDireccionales(0);
                         carrilDestino = carril;
-                        CambioHaciaElCamion = false;
-                        Cambiar(estadoAntes);
+                        Cambiar(Estado.Rebasando);
                         break;
                     }
                     desdeX = pos.x;
@@ -158,12 +143,10 @@ public class AutoQueRebasa : MonoBehaviour
                 break;
             case Estado.Cambiando:
                 Parpadear();
-                objetivo = vc + ventajaKmh / 3.6f * 0.3f;
-                if (carrilDestino != carril && carrilDestino == camion.Carril && HuecoConCamion(pos) < 1f)
+                if (carrilDestino != carril && carrilDestino == camion.Carril && Mathf.Abs(pos.z - cuerpoCamion.position.z) < distanciaRespeto * 0.5f)
                 {
-                    // El camión se le echó encima a medio cambio: regresa a su carril.
+                    // El camión se pasó al carril a donde iba: regresa al suyo.
                     carrilDestino = carril;
-                    CambioHaciaElCamion = false;
                     desdeX = pos.x;
                     tiempoEnEstado = 0f;
                 }
@@ -173,108 +156,59 @@ public class AutoQueRebasa : MonoBehaviour
                 {
                     carril = carrilDestino;
                     PrenderDireccionales(0);
-                    if (CambioHaciaElCamion)
-                    {
-                        SeMetioAlCarrilDelCamion = carril == camion.Carril;
-                        frenaDelante = frenaAlMeterse && HuecoConCamion(pos) >= vc * SegundosParaFrenar;
-                        Cambiar(Estado.Adelante);
-                    }
-                    else
-                    {
-                        Cambiar(Estado.Rebasando);   // sólo esquivó un auto parado: sigue rebasando
-                    }
+                    Cambiar(Estado.Rebasando);
                 }
                 break;
-            case Estado.Adelante:
-                // Frena sólo mientras tenga al camión detrás en su carril; si el camión ya lo esquivó, acelera y se va, así no se
-                // queda despacio en el único carril libre de una fila.
-                objetivo = frenaDelante && camion.Carril == carril ? vc * frenaHasta : rebase;
-                if (pos.z + MedioLargo < zCamion - MedioLargoCamion)
+            case Estado.Formado:
+                objetivo = 0f;
+                if (velocidadDeEnfrente >= 1f || cerca > Separacion + 3f)
                 {
-                    Cambiar(Estado.Atras);
+                    Cambiar(Estado.Rebasando);   // lo de enfrente se movió
                 }
-                else if (velocidadDeEnfrente < 1f && cerca < 6f + velocidad * segundosParaEsquivar)
-                {
-                    // Un auto parado enfrente: lo esquiva en lugar de formarse detrás, que alargaría la fila y le quitaría
-                    // espacio al camión para cambiarse de carril.
-                    Esquivar(pos, pos.z - MedioLargo >= zCamion + MedioLargoCamion + adelanteParaMeterse);
-                }
-                break;
-            case Estado.Atras:
-                objetivo = vc * frenaHasta;
                 break;
         }
         float porEnfrente = FrenarDetras(objetivo);
-        float tasa = porEnfrente < objetivo ? frenadoFuerte : aceleracion;
+        float tasa = porEnfrente < velocidad ? frenadoFuerte : aceleracion;
         velocidad = Mathf.MoveTowards(velocidad, porEnfrente, tasa * dt);
         pos.z += velocidad * dt;
         cuerpo.MovePosition(pos);
     }
 
-    // Ya pasó al camión: se cambia un carril hacia el del camión si ahí cabe sin pegarse a un auto parado.
-    bool BuscarHueco(Vector3 pos)
-    {
-        int carrilCamion = camion.Carril;
-        float tramoSinSalida = pos.z + VelocidadCamion * 3f + 10f;   // lo que tarda el camión en dejarlo atrás o esquivarlo
-        if (carrilCamion == carril)
-        {
-            // El camión se pasó a su carril por detrás: ya lo tiene adelante; frena, salvo que estorbe el único carril libre.
-            SeMetioAlCarrilDelCamion = true;
-            frenaDelante = !EsElUnicoLibre(carril, pos.z - 5f, tramoSinSalida) && HuecoConCamion(pos) >= VelocidadCamion * SegundosParaFrenar;
-            Cambiar(Estado.Adelante);
-            return true;
-        }
-        int destino = carril + (carrilCamion > carril ? 1 : -1);
-        if (!CarrilLibre(destino, pos.z - MedioLargo - 2f, pos.z + MedioLargo + 8f)
-            || (destino == carrilCamion && (!CabeDelante(pos) || !CorredorLibre(destino, pos))))
-        {
-            return false;
-        }
-        CambiarDeCarril(destino, destino == carrilCamion, pos);
-        return true;
-    }
-
-    // Un auto parado enfrente: se pasa a un carril de junto que esté libre. Al del camión, sólo si ya lo pasó y cabe delante.
-    void Esquivar(Vector3 pos, bool yaLoPaso)
+    // Un auto parado enfrente: se pasa a un carril de junto que esté libre y que no sea el del camión cerca de él.
+    void Esquivar(Vector3 pos)
     {
         foreach (int destino in new[] { carril - 1, carril + 1 })
         {
-            if (destino < -limite || destino > limite
-                || (destino == camion.Carril && !(yaLoPaso && CabeDelante(pos) && CorredorLibre(destino, pos))))
+            if (PuedeIrA(destino, pos))
             {
-                continue;
-            }
-            if (CarrilLibre(destino, pos.z - MedioLargo - 2f, pos.z + MedioLargo + 14f))
-            {
-                CambiarDeCarril(destino, destino == camion.Carril, pos);
+                carrilDestino = destino;
+                Cambiar(Estado.Direccional);
                 return;
             }
         }
     }
 
-    // Si va al carril del camión, decide desde ahora si al terminar frena: no, si ese carril es el único libre de una fila en lo
-    // que tarda el camión en esquivarlo o dejarlo atrás.
-    void CambiarDeCarril(int destino, bool haciaElCamion, Vector3 pos)
+    // A dónde puede cambiarse: un carril que exista, sin autos parados cerca, que no sea el del camión mientras estén cerca, y
+    // que, cerca del camión, no sea el único libre de una fila próxima (no le estorba la salida).
+    bool PuedeIrA(int destino, Vector3 pos)
     {
-        estadoAntes = EstadoActual;
-        carrilDestino = destino;
-        CambioHaciaElCamion = haciaElCamion;
-        frenaAlMeterse = haciaElCamion && !EsElUnicoLibre(destino, pos.z - 5f, pos.z + VelocidadCamion * 3f + 10f);
-        Cambiar(Estado.Direccional);
+        if (destino < -limite || destino > limite || destino == carril)
+        {
+            return false;
+        }
+        float dz = pos.z - cuerpoCamion.position.z;
+        bool cercaDelCamion = Mathf.Abs(dz) < distanciaRespeto;
+        if (cercaDelCamion && destino == camion.Carril)
+        {
+            return false;
+        }
+        float hasta = pos.z + MedioLargo + Mathf.Max(14f, velocidad * 1f);
+        if (!CarrilLibre(destino, pos.z - MedioLargo - 2f, hasta))
+        {
+            return false;
+        }
+        return !(cercaDelCamion && generador != null && generador.EsElUnicoLibre(destino, pos.z - 5f, pos.z + VelocidadCamion * 3f + 10f));
     }
-
-    bool EsElUnicoLibre(int c, float desde, float hasta) => generador != null && generador.EsElUnicoLibre(c, desde, hasta);
-
-    // Metros entre la cajuela del auto y la trompa del camión: positivos si el auto va delante.
-    float HuecoConCamion(Vector3 pos) => pos.z - MedioLargo - (cuerpoCamion.position.z + MedioLargoCamion);
-
-    // Si puede meterse delante del camión: va más rápido que él y le deja espacio para todo el cambio de carril.
-    bool CabeDelante(Vector3 pos) => velocidad >= VelocidadCamion && HuecoConCamion(pos) >= adelanteParaMeterse;
-
-    // El carril del camión, sin autos parados en lo que el auto recorre en 2.5 s: así, ya metido, nunca tiene que frenar a la
-    // fuerza justo delante del camión.
-    bool CorredorLibre(int c, Vector3 pos) =>
-        CarrilLibre(c, pos.z - MedioLargo - 2f, pos.z + MedioLargo + Mathf.Max(30f, velocidad * SegundosDeCorredor));
 
     bool CarrilLibre(int c, float desde, float hasta)
     {
@@ -282,7 +216,7 @@ public class AutoQueRebasa : MonoBehaviour
         var mitad = new Vector3(anchoCarril * 0.4f, 0.5f, (hasta - desde) / 2f);
         foreach (var otro in Physics.OverlapBox(centro, mitad, Quaternion.identity, ~0, QueryTriggerInteraction.Ignore))
         {
-            if (otro.CompareTag("Obstaculo") && otro.attachedRigidbody != cuerpo)
+            if ((otro.CompareTag("Obstaculo") && otro.attachedRigidbody != cuerpo) || otro.attachedRigidbody == cuerpoCamion)
             {
                 return false;
             }
@@ -290,7 +224,7 @@ public class AutoQueRebasa : MonoBehaviour
         return true;
     }
 
-    // Lo que tiene enfrente en su carril: un auto parado (velocidad 0), el camión o, si no hay nada en el alcance, infinito.
+    // Lo que tiene enfrente en su carril: un auto parado (velocidad 0), el camión u otro auto que rebasa; o infinito.
     void MirarAdelante(Vector3 pos)
     {
         float alcance = Mathf.Max(Separacion + velocidad * velocidad / (2f * frenadoFuerte) + 2f, 6f + velocidad * segundosParaEsquivar);
@@ -328,14 +262,14 @@ public class AutoQueRebasa : MonoBehaviour
     }
 
     // Baja la velocidad para quedarse a "Separacion" metros detrás de lo que tiene enfrente; si ya está encima, iguala su
-    // velocidad de golpe.
+    // velocidad de golpe. Nunca choca con el camión ni con un auto parado.
     float FrenarDetras(float objetivo)
     {
         if (cerca == float.MaxValue)
         {
             return objetivo;
         }
-        if (cerca < Separacion * 0.5f)
+        if (cerca < Separacion)
         {
             velocidad = Mathf.Min(velocidad, velocidadDeEnfrente);
         }

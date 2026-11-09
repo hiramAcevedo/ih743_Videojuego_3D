@@ -61,6 +61,7 @@ public class CamionRuta : MonoBehaviour
     public float Metros => Mathf.Max(0f, cuerpo.position.z - salidaZ);
     public float VelocidadActual { get; private set; }   // en km/h
     public Vector3 PosicionSalida { get; private set; }
+    public bool CambiandoDeCarril => Mathf.Abs(cuerpo.position.x - carril * anchoCarril) > 0.25f;   // va entre dos carriles
     public Collider UltimoChoque { get; private set; }   // con qué chocó: un auto parado, uno que venía rebasando o un tope
     public Collider UltimoTope { get; private set; }     // el último tope que pasó sin brincar a más de 120 km/h
 

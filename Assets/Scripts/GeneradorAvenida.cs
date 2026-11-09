@@ -43,6 +43,12 @@ public class GeneradorAvenida : MonoBehaviour
     [Tooltip("Segundos de camino delante del camión en que ninguna fila puede tener como único carril libre el carril por donde va " +
              "a rebasar el auto: mientras lo rebasan, el camión no tiene que meterse ahí.")]
     [SerializeField, Min(0f)] float segundosLibresCamion = 1.6f;
+    [Tooltip("Metro desde el que, además de los tranquilos, salen autos locos: pasan mucho más rápido y se pierden de vista.")]
+    [SerializeField, Min(0f)] float rebasesLocosDesde = 2500f;
+    [Tooltip("Desde ese metro, la probabilidad de que el auto que rebasa sea loco.")]
+    [SerializeField, Range(0f, 1f)] float probabilidadLoco = 0.5f;
+    [Tooltip("Metros delante del camión en que un auto loco ya se perdió de vista y se quita.")]
+    [SerializeField, Min(30f)] float locoSePierdeA = 130f;
 
     [Header("Curva de dificultad: etapas en orden")]
     [SerializeField] List<EtapaAvenida> etapas = new List<EtapaAvenida>();
@@ -130,7 +136,7 @@ public class GeneradorAvenida : MonoBehaviour
         for (int i = rebases.Count - 1; i >= 0; i--)
         {
             float dz = rebases[i].transform.position.z - z;
-            if (dz < -RebaseFueraDeCamara || dz > tramosPorDelante * largoTramo)
+            if (dz < -RebaseFueraDeCamara || dz > (rebases[i].Loco ? locoSePierdeA : tramosPorDelante * largoTramo))
             {
                 Destroy(rebases[i].gameObject);
                 rebases.RemoveAt(i);
@@ -369,7 +375,8 @@ public class GeneradorAvenida : MonoBehaviour
         float velocidad = camion.VelocidadActual / 3.6f;
         float mientrasPasa = frente + velocidad * segundosLibresCamion;
         var prefab = autosQueRebasan[azar.Next(autosQueRebasan.Length)];
-        float hasta = z + prefab.GetComponent<AutoQueRebasa>().MetrosParaRebasar(velocidad, apareceDetras) + margenLibreRebase;
+        bool loco = camion.Metros >= rebasesLocosDesde && azar.NextDouble() < probabilidadLoco;
+        float hasta = z + prefab.GetComponent<AutoQueRebasa>().MetrosParaRebasar(velocidad, apareceDetras, loco) + margenLibreRebase;
         int limite = carriles / 2;
         var opciones = new List<int>();
         foreach (int c in new[] { camion.Carril - 1, camion.Carril + 1 })
@@ -386,10 +393,10 @@ public class GeneradorAvenida : MonoBehaviour
         int carril = opciones[azar.Next(opciones.Count)];
         var auto = Instantiate(prefab, new Vector3(carril * anchoCarril, 0f, z - apareceDetras), Quaternion.identity, contenedorRebases);
         RebasesSalidos++;
-        auto.name = "Rebase " + RebasesSalidos + " · " + prefab.name;
+        auto.name = "Rebase " + RebasesSalidos + (loco ? " loco · " : " · ") + prefab.name;
         rebaseActivo = auto.GetComponent<AutoQueRebasa>();
         rebases.Add(rebaseActivo);
-        rebaseActivo.Arrancar(camion, this, carril, anchoCarril, carriles);
+        rebaseActivo.Arrancar(camion, this, carril, anchoCarril, carriles, loco);
         return true;
     }
 

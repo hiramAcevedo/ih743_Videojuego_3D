@@ -4,7 +4,7 @@ Videojuego 3D para teléfono de IH743 · Optativa Abierta III, unidad 4 (Univers
 Desarrollo de Sistemas Web). Hiram Agustín Acevedo López.
 
 Un camión de ruta avanza solo por una avenida mexicana: hay que cambiar de carril, brincar los topes y no chocar con los
-autos parados ni con los que lo rebasan y se le meten. Guadalajara, Monterrey y Ciudad de México serán los niveles.
+autos parados ni con los que lo rebasan. Guadalajara, Monterrey y Ciudad de México serán los niveles.
 
 ## Lo que hay en la entrega 4.1
 
@@ -40,8 +40,8 @@ autos parados ni con los que lo rebasan y se le meten. Guadalajara, Monterrey y 
 ## Lo que hay en la entrega 4.3
 
 <p align="center">
-  <img src="docs/capturas/4.3-rebase.png" width="270" alt="Un auto rebasa al camión y se le mete adelante a 117 km/h, en vertical">
-  <img src="docs/capturas/4.3-vida-perdida.png" width="270" alt="Un tope sin brincar quita una vida y frena el camión a 32 km/h, en vertical">
+  <img src="docs/capturas/4.3-rebase.png" width="270" alt="Un auto rebasa al camión por el carril de al lado en la hora pico, en vertical">
+  <img src="docs/capturas/4.3-vida-perdida.png" width="270" alt="A los 1,891 m, un tope sin brincar a 120 km/h quita una vida y frena el camión a 32 km/h, en vertical">
   <img src="docs/capturas/4.3-110-kmh.png" width="270" alt="El velocímetro en 110 km/h a los 1,500 m, en el viernes de quincena, en vertical">
 </p>
 
@@ -59,16 +59,18 @@ autos parados ni con los que lo rebasan y se le meten. Guadalajara, Monterrey y 
   seguido dos autos juntos, siempre con un carril libre; cuando entre dos filas no da tiempo de cruzar dos carriles, ese
   carril queda junto a uno de los libres de la fila anterior, y a más velocidad las filas se separan lo justo para que siempre
   dé tiempo de pasarse al carril de junto. El nombre de la etapa aparece debajo del récord.
-- **Autos que rebasan:** desde el tráfico medio, algunos autos vienen por detrás, más rápido que el camión, por el carril de
-  al lado; lo rebasan, ponen la direccional, se le meten adelante y frenan, así que hay que esquivarlos. Cada etapa trae
-  más: 3 por kilómetro en el tráfico medio, 6 en la hora pico y 10 en el viernes de quincena.
+- **Autos que rebasan:** desde el tráfico medio vienen autos por detrás, más rápido que el camión, por el carril de al lado.
+  El tranquilo lo rebasa, busca su lugar y ahí se queda: si encuentra un auto parado, se pasa a un carril libre que no sea el
+  del camión o se forma detrás. Desde los 2,500 m salen también autos locos, que pasan mucho más rápido y se pierden de
+  vista. Ninguno se cambia al carril del camión cerca de él, y si el camión se le mete enfrente, frena detrás. Cada etapa
+  trae más: 3 por kilómetro en el tráfico medio, 6 en la hora pico y 10 en el viernes de quincena.
 - **Etapas en el Inspector:** cada etapa es un `ScriptableObject` (`EtapaAvenida`, en `Assets/Etapas/`) que se crea con
   clic derecho > Create > Camión de ruta > Etapa de la avenida. Ahí se ajusta desde qué metro rige, qué porciones la
   componen y con qué peso, la separación entre filas, la probabilidad de dos autos y de tope, y cuántos autos por
   kilómetro vienen a rebasar. En el componente `GeneradorAvenida` van el largo del tramo, los tramos por delante, los
   autos, el tope, los autos que rebasan, la salida libre, la semilla y la lista de etapas.
-- **Bucle de juego:** al chocar se guarda el récord y el aviso dice a cuántos metros llegaste y si te cerró el paso un auto
-  parado o uno que te venía rebasando. JUGAR DE NUEVO (`ControlPartida.ReiniciarNivel`) vuelve a empezar en la misma
+- **Bucle de juego:** al chocar se guarda el récord y el aviso dice a cuántos metros llegaste y qué pasó: un auto parado,
+  uno que te rebasaba (y quién se cambió de carril) o que te quedaste sin vidas en los topes. JUGAR DE NUEVO (`ControlPartida.ReiniciarNivel`) vuelve a empezar en la misma
   escena: el contador regresa a 0 m, el camión a la salida y a 36 km/h, y el generador arma una avenida nueva.
 
 ## Controles
@@ -85,7 +87,7 @@ y Play.
 
 - `Assets/Scripts/`: `CamionRuta` (movimiento, curva de velocidad y colisiones), `GeneradorAvenida` (los tramos sin fin,
   sus obstáculos y los autos que rebasan), `EtapaAvenida` (las etapas de la curva de dificultad), `AutoQueRebasa` (el auto
-  que viene por detrás, se mete y frena), `ControlPartida` (el bucle de juego: choque, vidas y jugar de nuevo), `Marcador`
+  que viene por detrás y rebasa, tranquilo o loco), `ControlPartida` (el bucle de juego: choque, vidas y jugar de nuevo), `Marcador`
   (contador de metros, velocímetro, récord con `PlayerPrefs` y etapa en pantalla), `CamaraSeguimiento`,
   `EncuadreExhibicion` (en vertical, la cámara del menú se aleja hasta que el camión quepa completo), `Navegacion`
   (escenas y paneles), `AreaSegura`, `ContenidoVertical` (los paneles caben sin encimarse en cualquier proporción de
