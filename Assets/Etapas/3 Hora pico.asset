@@ -34,3 +34,4 @@ MonoBehaviour:
   separacionMaxima: 26
   probabilidadDosAutos: 0.6
   probabilidadTope: 0.3
+  rebasesPorKilometro: 6

@@ -1,16 +1,19 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-// El contador de la avenida, el récord y la etapa. Los metros suben parejo con el avance del camión en Z. El récord es la mejor
-// distancia: se guarda con PlayerPrefs al terminar la partida (choque o regreso al menú desde la pausa), así que sigue ahí la
-// próxima vez que se abre el juego. Debajo del récord va el nombre de la etapa que rige; al cambiar se resalta unos segundos.
-// En el menú, sin camión, sólo muestra el récord.
+// El contador de la avenida, el velocímetro, el récord y la etapa. Los metros suben parejo con el avance del camión en Z y el
+// velocímetro, en la esquina inferior derecha, dice a cuántos km/h va. El récord es la mejor distancia: se guarda con
+// PlayerPrefs al terminar la partida (choque o regreso al menú desde la pausa), así que sigue ahí la próxima vez que se abre
+// el juego. Debajo del récord va el nombre de la etapa que rige; al cambiar se resalta unos segundos. En el menú, sin camión,
+// sólo muestra el récord.
 public class Marcador : MonoBehaviour
 {
     public const string ClaveRecord = "RecordMetros";
 
     [SerializeField] CamionRuta camion;
     [SerializeField] Text textoMetros;
+    [Tooltip("El velocímetro: la velocidad del camión en km/h.")]
+    [SerializeField] Text textoVelocidad;
     [SerializeField] Text textoRecord;
 
     [Header("Etapa en pantalla")]
@@ -23,6 +26,7 @@ public class Marcador : MonoBehaviour
     bool enAvenida;
     bool guardado;
     int metros;
+    int kmh = -1;
     int record;
     EtapaAvenida etapaMostrada;
     float resaltadaHasta;
@@ -48,6 +52,12 @@ public class Marcador : MonoBehaviour
             metros = recorrido;
             Pintar();
         }
+        int velocidad = Mathf.RoundToInt(camion.VelocidadActual);
+        if (velocidad != kmh)
+        {
+            kmh = velocidad;
+            PintarVelocidad();
+        }
         if (camion.Detenido)
         {
             Guardar();
@@ -66,6 +76,11 @@ public class Marcador : MonoBehaviour
             return false;
         }
         guardado = true;
+        if (camion != null)
+        {
+            // Los metros de este momento, los mismos que dice el aviso de choque: el contador puede ir un cuadro atrás.
+            metros = Mathf.FloorToInt(camion.Metros);
+        }
         if (metros <= record)
         {
             return false;
@@ -82,8 +97,18 @@ public class Marcador : MonoBehaviour
     {
         guardado = false;
         metros = 0;
+        kmh = -1;
         etapaMostrada = null;
         Pintar();
+    }
+
+    // El número grande y la unidad más chica, como en un tablero.
+    void PintarVelocidad()
+    {
+        if (textoVelocidad != null)
+        {
+            textoVelocidad.text = kmh + " <size=" + Mathf.RoundToInt(textoVelocidad.fontSize * 0.55f) + ">km/h</size>";
+        }
     }
 
     void PintarEtapa()

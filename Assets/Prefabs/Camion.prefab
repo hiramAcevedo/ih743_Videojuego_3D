@@ -96,8 +96,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CamionRuta
   velocidadInicial: 36
-  velocidadMaxima: 72
-  metrosHastaMaxima: 380
+  velocidadMaxima: 110
+  metrosHastaMaxima: 1500
   curvaDificultad:
     serializedVersion: 2
     m_Curve:
@@ -105,7 +105,25 @@ MonoBehaviour:
       time: 0
       value: 0
       inSlope: 0
-      outSlope: 1
+      outSlope: 1.9203415
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.25333333
+      value: 0.4864865
+      inSlope: 1.9203415
+      outSlope: 0.7519616
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.6666667
+      value: 0.7972973
+      inSlope: 0.7519616
+      outSlope: 0.60810816
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
@@ -113,7 +131,7 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 1
       value: 1
-      inSlope: 1
+      inSlope: 0.60810816
       outSlope: 0
       tangentMode: 0
       weightedMode: 0

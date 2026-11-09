@@ -4,7 +4,8 @@ using UnityEngine;
 // Arma la avenida mientras se juega, por tramos. Siempre deja "tramosPorDelante" tramos delante del camión y destruye los que
 // quedan atrás de la cámara, así que la avenida no se acaba. La etapa que rige en cada metro (lista "etapas", assets de
 // EtapaAvenida) decide qué porción sale en cada tramo y cómo se reparten sus filas de obstáculos: uno o dos autos parados,
-// siempre con un carril libre, o un tope de lado a lado. ControlPartida llama a Reiniciar cuando se vuelve a empezar.
+// siempre con un carril libre, o un tope de lado a lado. También decide cada cuánto sale un auto por detrás a rebasar al camión
+// (AutoQueRebasa). ControlPartida llama a Reiniciar cuando se vuelve a empezar.
 public class GeneradorAvenida : MonoBehaviour
 {
     [Header("Tramos")]
@@ -22,6 +23,23 @@ public class GeneradorAvenida : MonoBehaviour
     [SerializeField, Range(2, 5)] int carriles = 3;
     [Tooltip("Metros sin obstáculos al arrancar.")]
     [SerializeField, Min(0f)] float salidaLibre = 30f;
+    [Tooltip("Segundos que quedan para cambiar de carril entre una fila y la siguiente (la separación menos el largo del camión y " +
+             "de un auto, a la velocidad del camión). Si son menos, el carril libre de una fila de dos autos queda a un solo cambio " +
+             "de algún carril libre de la fila anterior: nunca hay que cruzar dos carriles de golpe.")]
+    [SerializeField, Min(0f)] float segundosParaDosCarriles = 0.6f;
+
+    [Header("Autos que rebasan")]
+    [Tooltip("Prefabs de los autos que vienen por detrás a rebasar al camión; cada uno trae su AutoQueRebasa. Cuántos salen lo " +
+             "dice cada etapa.")]
+    [SerializeField] GameObject[] autosQueRebasan;
+    [Tooltip("Metros detrás del camión donde aparece el auto que va a rebasar; con 11 sale de fuera de la cámara.")]
+    [SerializeField, Min(0f)] float apareceDetras = 11f;
+    [Tooltip("Metros de más, sin autos parados, en el carril por donde va a rebasar, después de donde termina de rebasar: lo que " +
+             "necesita para no frenar antes de meterse.")]
+    [SerializeField, Min(0f)] float margenLibreRebase = 20f;
+    [Tooltip("Segundos de camino delante del camión en que ninguna fila puede tener como único carril libre el carril por donde va " +
+             "a rebasar el auto: mientras lo rebasan, el camión no tiene que meterse ahí.")]
+    [SerializeField, Min(0f)] float segundosLibresCamion = 1.6f;
 
     [Header("Curva de dificultad: etapas en orden")]
     [SerializeField] List<EtapaAvenida> etapas = new List<EtapaAvenida>();
@@ -37,19 +55,33 @@ public class GeneradorAvenida : MonoBehaviour
     // entre un tramo y otro que le den un brinco al camión.
     const float LargoSuelo = 1200f;
     const float AdelanteSuelo = 900f;   // al colocarlo: 900 m delante del camión y 300 m detrás
+    const float MedioLargoCamion = 4.3f;
+    const float LargoCamionYAuto = 12.9f;    // 8.6 m del camión y 4.3 m de un auto: lo que no sirve para cambiar de carril
+    const float RebaseFueraDeCamara = 20f;   // metros detrás del camión en que ya no se ve un auto que rebasó
+    const float UnoALaVez = 60f;             // no sale otro auto a rebasar mientras el último esté a menos de esto del camión
 
     readonly Queue<Transform> tramos = new Queue<Transform>();
+    readonly Queue<(float z, int libres)> filas = new Queue<(float z, int libres)>();   // las filas en pie y sus carriles libres
     System.Random azar;
     Transform suelo;
+    Transform contenedorRebases;
     float origenZ;           // el metro 0 de la avenida: donde arranca el camión
     float zTramo;            // donde empieza el siguiente tramo
     float zFila;             // donde va la siguiente fila de obstáculos
+    float zFilaAnterior;
+    int libresAnteriores;    // los carriles libres de la fila anterior, uno por bit
     GameObject ultimaPorcion;
+    AutoQueRebasa rebaseActivo;              // el último que salió
+    readonly List<AutoQueRebasa> rebases = new List<AutoQueRebasa>();
+    EtapaAvenida etapaRebases;   // la etapa con la que se programó el siguiente rebase
+    float proximoRebase;         // metro de la avenida en que sale el siguiente auto que rebasa; -1 si la etapa no trae
 
     public int TramosCreados { get; private set; }
     public int TramosDestruidos { get; private set; }
     public int TramosEnPie => tramos.Count;
     public int SemillaUsada { get; private set; }
+    public int RebasesSalidos { get; private set; }
+    public AutoQueRebasa RebaseActivo => rebaseActivo;
 
     void Awake()
     {
@@ -57,6 +89,8 @@ public class GeneradorAvenida : MonoBehaviour
         suelo.SetParent(transform, false);
         var caja = suelo.gameObject.AddComponent<BoxCollider>();
         caja.size = new Vector3(anchoCarril * carriles, 0.2f, LargoSuelo);
+        contenedorRebases = new GameObject("Autos que rebasan").transform;
+        contenedorRebases.SetParent(transform, false);
     }
 
     void Start()
@@ -82,10 +116,24 @@ public class GeneradorAvenida : MonoBehaviour
             Destroy(tramos.Dequeue().gameObject);
             TramosDestruidos++;
         }
+        while (filas.Count > 0 && filas.Peek().z < z - margenDetras)
+        {
+            filas.Dequeue();
+        }
         if (z > suelo.position.z)   // a la mitad del camino se vuelve a poner adelante
         {
             ColocarSuelo(z);
         }
+        for (int i = rebases.Count - 1; i >= 0; i--)
+        {
+            float dz = rebases[i].transform.position.z - z;
+            if (dz < -RebaseFueraDeCamara || dz > tramosPorDelante * largoTramo)
+            {
+                Destroy(rebases[i].gameObject);
+                rebases.RemoveAt(i);
+            }
+        }
+        ProgramarRebases();
     }
 
     // Borra la avenida y arma una nueva desde la salida.
@@ -95,11 +143,23 @@ public class GeneradorAvenida : MonoBehaviour
         {
             Destroy(tramos.Dequeue().gameObject);
         }
+        foreach (Transform auto in contenedorRebases)
+        {
+            Destroy(auto.gameObject);
+        }
+        filas.Clear();
+        rebases.Clear();
+        rebaseActivo = null;
+        etapaRebases = null;
+        proximoRebase = -1f;
+        RebasesSalidos = 0;
         SemillaUsada = semilla != 0 ? semilla : Random.Range(1, int.MaxValue);
         azar = new System.Random(SemillaUsada);
         origenZ = camion.PosicionSalida.z;
         zTramo = origenZ - largoTramo;   // un tramo detrás de la salida, para que la cámara no vea el vacío
         zFila = origenZ + salidaLibre;
+        zFilaAnterior = origenZ;
+        libresAnteriores = (1 << carriles) - 1;
         ultimaPorcion = null;
         TramosCreados = 0;
         TramosDestruidos = 0;
@@ -183,21 +243,45 @@ public class GeneradorAvenida : MonoBehaviour
         return ultima;
     }
 
-    // Una fila: un tope de lado a lado, o uno o dos autos parados que siempre dejan un carril libre.
+    // Una fila: un tope de lado a lado, o uno o dos autos parados que siempre dejan un carril libre. Con dos autos queda un solo
+    // carril libre; si entre la fila anterior y ésta quedan menos de "segundosParaDosCarriles" para cambiar de carril, ese
+    // carril queda a un cambio o menos de algún carril que la anterior dejó libre: viendo las dos filas, siempre se alcanza.
     void CrearFila(Transform tramo, float z, EtapaAvenida etapa)
     {
+        float segundos = (z - zFilaAnterior - LargoCamionYAuto) / Mathf.Max(1f, camion.VelocidadEn(z - origenZ) / 3.6f);
+        zFilaAnterior = z;
+        int todos = (1 << carriles) - 1;
         if (tope != null && azar.NextDouble() < etapa.probabilidadTope)
         {
             Instantiate(tope, new Vector3(0f, 0f, z), Quaternion.identity, tramo);
+            libresAnteriores = todos;
+            filas.Enqueue((z, todos));
             return;
         }
         if (autos == null || autos.Length == 0)
         {
             return;
         }
-        int libre = azar.Next(carriles);
         bool dos = azar.NextDouble() < etapa.probabilidadDosAutos;
+        int libre = azar.Next(carriles);
+        if (dos && segundos < segundosParaDosCarriles)
+        {
+            var alcanzables = new List<int>();
+            for (int c = 0; c < carriles; c++)
+            {
+                for (int p = 0; p < carriles; p++)
+                {
+                    if ((libresAnteriores & (1 << p)) != 0 && Mathf.Abs(c - p) <= 1)
+                    {
+                        alcanzables.Add(c);
+                        break;
+                    }
+                }
+            }
+            libre = alcanzables[azar.Next(alcanzables.Count)];
+        }
         int conAuto = azar.Next(carriles - 1);   // con un solo auto, cuál de los otros carriles lo lleva
+        int libres = 1 << libre;
         for (int c = 0, otro = 0; c < carriles; c++)
         {
             if (c == libre)
@@ -209,8 +293,114 @@ public class GeneradorAvenida : MonoBehaviour
                 float x = (c - (carriles - 1) / 2f) * anchoCarril;
                 Instantiate(autos[azar.Next(autos.Length)], new Vector3(x, 0f, z), Quaternion.identity, tramo);
             }
+            else
+            {
+                libres |= 1 << c;
+            }
             otro++;
         }
+        libresAnteriores = libres;
+        filas.Enqueue((z, libres));
+    }
+
+    // Si entre "desde" y "hasta" hay una fila cuyo único carril libre es ese (con la numeración del camión: -1, 0 y 1). Un auto
+    // que rebasa no se mete ni frena ahí: el camión se quedaría sin salida.
+    public bool EsElUnicoLibre(int carril, float desde, float hasta)
+    {
+        int bit = 1 << (carril + carriles / 2);
+        foreach (var fila in filas)
+        {
+            if (fila.z >= desde && fila.z <= hasta && fila.libres == bit)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Los autos que rebasan: cada etapa dice cuántos salen por kilómetro, y la distancia entre uno y otro varía al azar entre
+    // 60 % y 140 % del promedio. Al entrar a una etapa que trae, el primero sale a la mitad de esa distancia. Sale uno a la vez
+    // (el anterior ya a más de 60 m), por un carril junto al del camión que esté sin autos parados hasta donde termina de rebasar
+    // (más "margenLibreRebase") y que no sea el único libre de ninguna fila en los "segundosLibresCamion" que pasa junto al
+    // camión; si no hay, lo intenta 10 m después.
+    void ProgramarRebases()
+    {
+        if (autosQueRebasan == null || autosQueRebasan.Length == 0 || camion.Detenido)
+        {
+            return;
+        }
+        float metro = camion.Metros;
+        var etapa = EtapaEn(metro);
+        if (etapa != etapaRebases)
+        {
+            etapaRebases = etapa;
+            if (etapa.rebasesPorKilometro <= 0f)
+            {
+                proximoRebase = -1f;
+            }
+            else
+            {
+                float primero = metro + Intervalo(etapa) * 0.5f;
+                proximoRebase = proximoRebase < 0f ? primero : Mathf.Min(proximoRebase, primero);
+            }
+        }
+        bool otroCerca = rebaseActivo != null && Mathf.Abs(rebaseActivo.transform.position.z - camion.transform.position.z) < UnoALaVez;
+        if (proximoRebase < 0f || metro < proximoRebase || otroCerca)
+        {
+            return;
+        }
+        proximoRebase = metro + (SacarRebase() ? Intervalo(etapa) : 10f);
+    }
+
+    float Intervalo(EtapaAvenida etapa)
+    {
+        return 1000f / etapa.rebasesPorKilometro * Mathf.Lerp(0.6f, 1.4f, (float)azar.NextDouble());
+    }
+
+    bool SacarRebase()
+    {
+        float z = camion.transform.position.z;
+        float frente = z + MedioLargoCamion;
+        float velocidad = camion.VelocidadActual / 3.6f;
+        float mientrasPasa = frente + velocidad * segundosLibresCamion;
+        var prefab = autosQueRebasan[azar.Next(autosQueRebasan.Length)];
+        float hasta = z + prefab.GetComponent<AutoQueRebasa>().MetrosParaRebasar(velocidad, apareceDetras) + margenLibreRebase;
+        int limite = carriles / 2;
+        var opciones = new List<int>();
+        foreach (int c in new[] { camion.Carril - 1, camion.Carril + 1 })
+        {
+            if (c >= -limite && c <= limite && CarrilLibre(c, z - apareceDetras - 3f, hasta) && !EsElUnicoLibre(c, z, mientrasPasa))
+            {
+                opciones.Add(c);
+            }
+        }
+        if (opciones.Count == 0)
+        {
+            return false;
+        }
+        int carril = opciones[azar.Next(opciones.Count)];
+        var auto = Instantiate(prefab, new Vector3(carril * anchoCarril, 0f, z - apareceDetras), Quaternion.identity, contenedorRebases);
+        RebasesSalidos++;
+        auto.name = "Rebase " + RebasesSalidos + " · " + prefab.name;
+        rebaseActivo = auto.GetComponent<AutoQueRebasa>();
+        rebases.Add(rebaseActivo);
+        rebaseActivo.Arrancar(camion, this, carril, anchoCarril, carriles);
+        return true;
+    }
+
+    // Sin autos parados (ni el que ya va rebasando) en ese carril entre "desde" y "hasta".
+    bool CarrilLibre(int carril, float desde, float hasta)
+    {
+        var centro = new Vector3(carril * anchoCarril, 0.8f, (desde + hasta) / 2f);
+        var mitad = new Vector3(anchoCarril * 0.4f, 0.5f, (hasta - desde) / 2f);
+        foreach (var c in Physics.OverlapBox(centro, mitad, Quaternion.identity, ~0, QueryTriggerInteraction.Ignore))
+        {
+            if (c.CompareTag("Obstaculo"))
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     void ColocarSuelo(float z)

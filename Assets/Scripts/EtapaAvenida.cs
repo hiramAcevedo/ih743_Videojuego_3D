@@ -4,7 +4,8 @@ using UnityEngine;
 
 // Una etapa de la avenida, como el Stage del tutorial: un asset que se crea con clic derecho > Create > Camión de ruta >
 // Etapa de la avenida y se ajusta en el Inspector. Dice desde qué metro rige, qué porciones (prefabs de tramo) la componen y
-// con qué peso, y cómo se reparten los obstáculos en sus filas. GeneradorAvenida guarda la lista de etapas en orden.
+// con qué peso, cómo se reparten los obstáculos en sus filas y cuántos autos por kilómetro vienen a rebasar al camión.
+// GeneradorAvenida guarda la lista de etapas en orden.
 [CreateAssetMenu(fileName = "Nueva etapa", menuName = "Camión de ruta/Etapa de la avenida", order = 0)]
 public class EtapaAvenida : ScriptableObject
 {
@@ -36,6 +37,11 @@ public class EtapaAvenida : ScriptableObject
     [Range(0f, 1f)] public float probabilidadDosAutos;
     [Tooltip("Probabilidad de que una fila sea un tope de lado a lado en lugar de autos.")]
     [Range(0f, 1f)] public float probabilidadTope = 0.2f;
+
+    [Header("Autos que rebasan")]
+    [Tooltip("Cuántos autos por kilómetro vienen por detrás, más rápido que el camión, por el carril de al lado, lo rebasan y " +
+             "se le meten adelante. Cada uno sale en cuanto hay un carril libre para rebasar. Con 0 no sale ninguno en esta etapa.")]
+    [Range(0f, 15f)] public float rebasesPorKilometro;
 
     void OnValidate()
     {
