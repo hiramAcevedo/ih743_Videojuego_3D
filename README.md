@@ -73,10 +73,34 @@ autos parados ni con los que lo rebasan. Guadalajara, Monterrey y Ciudad de Méx
   uno que te rebasaba (y quién se cambió de carril) o que te quedaste sin vidas en los topes. JUGAR DE NUEVO (`ControlPartida.ReiniciarNivel`) vuelve a empezar en la misma
   escena: el contador regresa a 0 m, el camión a la salida y a 36 km/h, y el generador arma una avenida nueva.
 
+## Lo que hay en la entrega 4.4
+
+<p align="center">
+  <img src="docs/capturas/4.4-pintura.png" width="270" alt="El menú con la pintura blanca R-182 en el camión que gira, en vertical">
+  <img src="docs/capturas/4.4-atardecer.png" width="270" alt="La hora pico al atardecer, con cielo naranja y sol bajo, a los 720 m, en vertical">
+  <img src="docs/capturas/4.4-anochecer.png" width="270" alt="El viernes de quincena al anochecer, con las calaveras encendidas, a los 1,100 m, en vertical">
+</p>
+
+- **La hora del día por etapa:** cada etapa trae su ambiente en el Inspector: el color del cielo (el fondo de la cámara y
+  la niebla), el color, la fuerza, la altura y el giro del sol, y el color de la luz ambiental. `LuzDelDia` lee la etapa del
+  metro donde va el camión y pasa de un ambiente al otro en 3 segundos: mañana en el tráfico ligero, mediodía en el tráfico
+  medio (cielo más azul y sol alto), atardecer en la hora pico (cielo naranja, sol bajo y sombras largas) y anochecer en el
+  viernes de quincena (cielo morado y sol casi en el horizonte). JUGAR DE NUEVO regresa a la mañana de golpe.
+- **Pintura del camión:** el botón PINTURA del menú cambia la del camión que gira entre la verde de Mi Transporte, la roja
+  de las R-400 y la blanca con techo y defensas azules del trompudo R-182, y la guarda con `PlayerPrefs`: en la avenida el
+  camión sale con esa pintura, también la próxima vez que se abre el juego. Cada pintura es un `ScriptableObject`
+  (`PinturaCamion`, en `Assets/Pinturas/`) que se crea con clic derecho > Create > Camión de ruta > Pintura del camión: el
+  color de la carrocería, del techo, de los cuadros y de las defensas, su suavidad y qué tan metálica es. `PintarCamion` la
+  aplica con materiales propios del camión, así no tiñe a los autos que comparten material con él.
+- **Posprocesado:** un volumen global en cada escena (`Assets/Posproceso/Brillo suave`) con un bloom suave, que sólo hace
+  brillar lo que brilla más que el blanco (faros, calaveras, letrero de ruta, semáforos y direccionales), y un viñeteado
+  ligero.
+
 ## Controles
 
 - Teléfono: ◄ y ► cambian de carril, BRINCAR salta y PAUSA está arriba a la izquierda.
 - Computadora: flechas o A y D para el carril; barra, W o flecha arriba para brincar.
+- En el menú, PINTURA cambia la pintura del camión.
 
 ## Abrir el proyecto
 
@@ -91,13 +115,16 @@ y Play.
   (contador de metros, velocímetro, récord con `PlayerPrefs` y etapa en pantalla), `CamaraSeguimiento`,
   `EncuadreExhibicion` (en vertical, la cámara del menú se aleja hasta que el camión quepa completo), `Navegacion`
   (escenas y paneles), `AreaSegura`, `ContenidoVertical` (los paneles caben sin encimarse en cualquier proporción de
-  pantalla), `Girar` y `TextoConProfundidad`.
+  pantalla), `Girar`, `TextoConProfundidad`, `LuzDelDia` (la hora del día de cada etapa), `PinturaCamion` (una pintura del
+  camión), `PintarCamion` (aplica la pintura elegida) y `BotonPintura` (el botón PINTURA del menú).
 - `Assets/Scenes/`: `Menu` y `Ruta`.
 - `Assets/Etapas/`: Tráfico ligero, Tráfico medio, Hora pico y Viernes de quincena.
+- `Assets/Pinturas/`: Verde Mi Transporte, Roja R-400 y Blanca R-182.
+- `Assets/Posproceso/`: el perfil del volumen, con el bloom y el viñeteado.
 - `Assets/Prefabs/`: el camión, tres autos, sus tres variantes que rebasan (con direccionales) y el tope, armados con
-  figuras básicas de Unity. El camión lleva el verde de
-  las unidades actuales de Guadalajara y el número R-743; el modelo definitivo y las otras pinturas llegan en las
-  siguientes entregas. En `Tramos/`, las cinco porciones de la avenida: dos cuadras de casas, dos de comercios y el cruce.
+  figuras básicas de Unity. El camión lleva el número R-743 y la pintura elegida en el menú; el modelo definitivo llega en
+  las siguientes entregas. En `Tramos/`, las cinco porciones de la avenida: dos cuadras de casas, dos de comercios y el
+  cruce.
 - `Assets/Shaders/`: el texto 3D del número de ruta, que respeta la profundidad.
 
 Cada entrega lleva su etiqueta: `act-4.1`, `act-4.2`, etcétera.
