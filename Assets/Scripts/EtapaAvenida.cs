@@ -4,8 +4,9 @@ using UnityEngine;
 
 // Una etapa de la avenida, como el Stage del tutorial: un asset que se crea con clic derecho > Create > Camión de ruta >
 // Etapa de la avenida y se ajusta en el Inspector. Dice desde qué metro rige, qué porciones (prefabs de tramo) la componen y
-// con qué peso, cómo se reparten los obstáculos en sus filas y cuántos autos por kilómetro vienen a rebasar al camión.
-// GeneradorAvenida guarda la lista de etapas en orden.
+// con qué peso, cómo se reparten los obstáculos en sus filas, cuántos autos por kilómetro vienen a rebasar al camión y su
+// ambiente: el color del cielo, el sol y la luz a esa hora del día (LuzDelDia pasa de uno a otro). GeneradorAvenida guarda la
+// lista de etapas en orden.
 [CreateAssetMenu(fileName = "Nueva etapa", menuName = "Camión de ruta/Etapa de la avenida", order = 0)]
 public class EtapaAvenida : ScriptableObject
 {
@@ -42,6 +43,20 @@ public class EtapaAvenida : ScriptableObject
     [Tooltip("Cuántos autos por kilómetro vienen por detrás, más rápido que el camión, por el carril de al lado, lo rebasan y " +
              "se le meten adelante. Cada uno sale en cuanto hay un carril libre para rebasar. Con 0 no sale ninguno en esta etapa.")]
     [Range(0f, 15f)] public float rebasesPorKilometro;
+
+    [Header("Ambiente: la hora del día")]
+    [Tooltip("Color del cielo: el fondo de la cámara y la niebla.")]
+    public Color colorCielo = new Color32(150, 196, 236, 255);
+    [Tooltip("Color de la luz del sol.")]
+    public Color colorSol = new Color32(255, 244, 226, 255);
+    [Tooltip("Qué tan fuerte alumbra el sol.")]
+    [Range(0f, 2f)] public float intensidadSol = 1.25f;
+    [Tooltip("Qué tan alto va el sol, en grados sobre el horizonte: bajo, sombras largas.")]
+    [Range(2f, 90f)] public float alturaSol = 48f;
+    [Tooltip("De dónde viene el sol, en grados alrededor del eje vertical.")]
+    [Range(-180f, 180f)] public float giroSol = -38f;
+    [Tooltip("Color de la luz que baja del cielo y rellena las sombras.")]
+    public Color colorAmbiente = new Color32(171, 208, 240, 255);
 
     void OnValidate()
     {

@@ -35,3 +35,9 @@ MonoBehaviour:
   probabilidadDosAutos: 0.6
   probabilidadTope: 0.3
   rebasesPorKilometro: 6
+  colorCielo: {r: 0.95686275, g: 0.6666667, b: 0.43137255, a: 1}
+  colorSol: {r: 1, g: 0.6509804, b: 0.3764706, a: 1}
+  intensidadSol: 1.15
+  alturaSol: 14
+  giroSol: -62
+  colorAmbiente: {r: 0.9411765, g: 0.7137255, b: 0.5568628, a: 1}

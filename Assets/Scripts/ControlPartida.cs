@@ -13,6 +13,8 @@ public class ControlPartida : MonoBehaviour
     [SerializeField] Marcador marcador;
     [SerializeField] Navegacion navegacion;
     [SerializeField] CamaraSeguimiento camara;
+    [Tooltip("La hora del día: al jugar de nuevo regresa a la mañana.")]
+    [SerializeField] LuzDelDia luz;
     [Tooltip("El texto del aviso de choque que dice a cuántos metros se llegó.")]
     [SerializeField] Text textoDistancia;
     [Tooltip("El texto del aviso de choque que dice con qué se chocó: un auto parado o uno que venía rebasando.")]
@@ -156,6 +158,10 @@ public class ControlPartida : MonoBehaviour
         if (camara != null)
         {
             camara.Colocar();
+        }
+        if (luz != null)
+        {
+            luz.Reiniciar();
         }
         navegacion.MostrarJuego();
         Partida++;

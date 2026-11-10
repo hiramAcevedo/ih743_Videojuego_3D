@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6fd85af0caab24972b56723951e5abb6, type: 3}
+  m_Name: 2 Roja R-400
+  m_EditorClassIdentifier: Assembly-CSharp::PinturaCamion
+  nombre: Roja R-400
+  carroceria: {r: 0.76862746, g: 0.10980392, b: 0.15686275, a: 1}
+  techo: {r: 0.8235294, g: 0.15686275, b: 0.19607843, a: 1}
+  cuadrosA: {r: 0.5882353, g: 0.07058824, b: 0.10980392, a: 1}
+  cuadrosB: {r: 0.78431374, g: 0.7921569, b: 0.80784315, a: 1}
+  cuadrosC: {r: 0.15686275, g: 0.15686275, b: 0.17254902, a: 1}
+  defensas: {r: 0.27450982, g: 0.28235295, b: 0.29803923, a: 1}
+  suavidad: 0.5
+  metalico: 0.1

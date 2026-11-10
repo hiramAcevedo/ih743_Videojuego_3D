@@ -757,6 +757,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 170983778113026622}
+  - component: {fileID: 3884595457263070757}
   m_Layer: 0
   m_Name: Camion modelo
   m_TagString: Untagged
@@ -809,6 +810,22 @@ Transform:
   - {fileID: 9073726764432821661}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3884595457263070757
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2833119510481330235}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ff9f639eb99147fea13363a3c5d431b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PintarCamion
+  pinturas:
+  - {fileID: 11400000, guid: e111bbd399de248339b98953d7022ab6, type: 2}
+  - {fileID: 11400000, guid: 48db0c75eba49486fa19b303c7205d11, type: 2}
+  - {fileID: 11400000, guid: f7ffffc258b234a588731e20a844c75f, type: 2}
 --- !u!1 &2894089952660143419
 GameObject:
   m_ObjectHideFlags: 0
