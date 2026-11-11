@@ -4,7 +4,7 @@ Videojuego 3D para teléfono de IH743 · Optativa Abierta III, unidad 4 (Univers
 Desarrollo de Sistemas Web). Hiram Agustín Acevedo López.
 
 Un camión de ruta avanza solo por una avenida mexicana: hay que cambiar de carril, brincar los topes y no chocar con los
-autos parados ni con los que lo rebasan. Guadalajara, Monterrey y Ciudad de México serán los niveles.
+autos parados ni con los que lo rebasan. Guadalajara y Monterrey ya son niveles; Ciudad de México será el tercero.
 
 ## Lo que hay en la entrega 4.1
 
@@ -96,11 +96,39 @@ autos parados ni con los que lo rebasan. Guadalajara, Monterrey y Ciudad de Méx
   brillar lo que brilla más que el blanco (faros, calaveras, letrero de ruta, semáforos y direccionales), y un viñeteado
   ligero.
 
+## Lo que hay en la entrega 4.5
+
+<p align="center">
+  <img src="docs/capturas/4.5-niveles.png" width="270" alt="El panel NIVELES del menú: Guadalajara por terminar, Monterrey cerrado y la ruta libre con su récord, en vertical">
+  <img src="docs/capturas/4.5-terminal.png" width="270" alt="El aviso de nivel completado en la terminal de Guadalajara, con el botón SIGUIENTE: MONTERREY, en vertical">
+  <img src="docs/capturas/4.5-monterrey.png" width="270" alt="Monterrey en la hora pico, con el Cerro de la Silla detrás de la ciudad y espectaculares en las azoteas, a los 700 m, en vertical">
+</p>
+
+- **Dos niveles, cada uno en su escena:** `Guadalajara` (nivel 1) y `Monterrey` (nivel 2), en Build Settings después de
+  `Menu` y antes de `Ruta`, que queda como la ruta libre del récord. Cada nivel es un `ScriptableObject` (`NivelRuta`, en
+  `Assets/Niveles/`) que se crea con clic derecho > Create > Camión de ruta > Nivel: la ciudad, la escena, los metros hasta la
+  terminal, la velocidad del camión con su curva, las etapas de su avenida y desde dónde salen los autos locos. `RutaNiveles`
+  los guarda en orden.
+- **La terminal:** cada nivel termina en un arco con el letrero de la ciudad y una raya de llegada a cuadros. Desde 45 m antes
+  ya no hay obstáculos y desde 220 m antes no sale ningún auto a rebasar. Al cruzarla, el nivel queda terminado con
+  `PlayerPrefs`, el camión frena hasta pararse y sale el aviso con SIGUIENTE NIVEL, que carga la escena de la otra ciudad con
+  `SceneManager`. Después de Monterrey sale el fin de la ruta.
+- **Guadalajara y Monterrey:** Guadalajara es la avenida de las entregas anteriores hasta los 1,200 m, donde va a unos
+  100 km/h. Monterrey mide 2,000 m: sale a 60 km/h, pasa de 120 km/h a los 800 m (de ahí hay que brincar los topes) y llega a
+  145 km/h. Trae sus propias etapas, más cargadas (tráfico medio desde la salida, hora pico desde los 400 m y viernes de
+  quincena desde los 1,000 m), autos locos desde los 800 m, fachadas de colores de tierra, espectaculares en las azoteas y el
+  Cerro de la Silla en el horizonte, que se tiñe con el cielo de cada hora.
+- **Menú y navegación:** JUGAR lleva al primer nivel sin terminar y lo dice debajo. NIVELES muestra una tarjeta por ciudad
+  con su estado (por terminar, terminado o cerrado: Monterrey se abre al terminar Guadalajara) y la de la ruta libre con el
+  récord. En la avenida, PAUSA tiene CONTINUAR, REINICIAR y MENÚ PRINCIPAL, y en los niveles el HUD dice la ciudad, cuánto
+  falta para la terminal y una barra de avance. Cada cambio de escena lleva un fundido a negro (`Transicion`, con
+  `SceneManager.LoadSceneAsync`), también al salir desde la pausa.
+
 ## Controles
 
 - Teléfono: ◄ y ► cambian de carril, BRINCAR salta y PAUSA está arriba a la izquierda.
 - Computadora: flechas o A y D para el carril; barra, W o flecha arriba para brincar.
-- En el menú, PINTURA cambia la pintura del camión.
+- En el menú, PINTURA cambia la pintura del camión y NIVELES elige ciudad o la ruta libre.
 
 ## Abrir el proyecto
 
@@ -116,15 +144,20 @@ y Play.
   `EncuadreExhibicion` (en vertical, la cámara del menú se aleja hasta que el camión quepa completo), `Navegacion`
   (escenas y paneles), `AreaSegura`, `ContenidoVertical` (los paneles caben sin encimarse en cualquier proporción de
   pantalla), `Girar`, `TextoConProfundidad`, `LuzDelDia` (la hora del día de cada etapa), `PinturaCamion` (una pintura del
-  camión), `PintarCamion` (aplica la pintura elegida) y `BotonPintura` (el botón PINTURA del menú).
-- `Assets/Scenes/`: `Menu` y `Ruta`.
-- `Assets/Etapas/`: Tráfico ligero, Tráfico medio, Hora pico y Viernes de quincena.
+  camión), `PintarCamion` (aplica la pintura elegida), `BotonPintura` (el botón PINTURA del menú), `NivelRuta` (un nivel),
+  `RutaNiveles` (los niveles en orden), `BotonNivel` (una tarjeta del panel NIVELES), `Transicion` (el fundido entre escenas),
+  `Horizonte` (el cerro del fondo) y `Formato` (los números con coma de miles).
+- `Assets/Scenes/`: `Menu`, `Guadalajara`, `Monterrey` y `Ruta` (la ruta libre).
+- `Assets/Niveles/`: Guadalajara, Monterrey y la ruta de niveles.
+- `Assets/Etapas/`: Tráfico ligero, Tráfico medio, Hora pico y Viernes de quincena, y las tres de Monterrey (`MTY`).
 - `Assets/Pinturas/`: Verde Mi Transporte, Roja R-400 y Blanca R-182.
 - `Assets/Posproceso/`: el perfil del volumen, con el bloom y el viñeteado.
 - `Assets/Prefabs/`: el camión, tres autos, sus tres variantes que rebasan (con direccionales) y el tope, armados con
   figuras básicas de Unity. El camión lleva el número R-743 y la pintura elegida en el menú; el modelo definitivo llega en
-  las siguientes entregas. En `Tramos/`, las cinco porciones de la avenida: dos cuadras de casas, dos de comercios y el
-  cruce.
-- `Assets/Shaders/`: el texto 3D del número de ruta, que respeta la profundidad.
+  las siguientes entregas. En `Tramos/`, las cinco porciones de la avenida (dos cuadras de casas, dos de comercios y el
+  cruce) y las cuatro de Monterrey; además, la terminal.
+- `Assets/Modelos/`: el tope y el Cerro de la Silla en low poly.
+- `Assets/Shaders/`: el texto 3D del número de ruta, que respeta la profundidad, y el del cerro del horizonte, que se dibuja
+  detrás de todo y se tiñe con la niebla.
 
 Cada entrega lleva su etiqueta: `act-4.1`, `act-4.2`, etcétera.
