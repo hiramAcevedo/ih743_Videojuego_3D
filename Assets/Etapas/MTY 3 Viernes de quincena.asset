@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc0a86ecd74874cca9dc9ca33729cef9, type: 3}
+  m_Name: MTY 3 Viernes de quincena
+  m_EditorClassIdentifier: Assembly-CSharp::EtapaAvenida
+  nombre: Viernes de quincena
+  desdeMetro: 1000
+  porciones:
+  - nombre: Cuadra de casas
+    prefab: {fileID: 1972248700560372036, guid: a9b93bab9ba9a45678e1165f0d58c6dd, type: 3}
+    peso: 1
+  - nombre: Cuadra de comercios A
+    prefab: {fileID: 547994176714248909, guid: ccadeaf373ae5418e8094d60fba4908e, type: 3}
+    peso: 3
+  - nombre: Cuadra de comercios B
+    prefab: {fileID: 5762158417282673870, guid: 680b9f1506b404162afb760485468e03, type: 3}
+    peso: 3
+  - nombre: Cruce con paso peatonal
+    prefab: {fileID: 4676380370361151849, guid: 1f30e80f5dd434e6cb724adc3f0613f4, type: 3}
+    peso: 3
+  separacionMinima: 20
+  separacionMaxima: 28
+  probabilidadDosAutos: 0.55
+  probabilidadTope: 0.3
+  rebasesPorKilometro: 10
+  colorCielo: {r: 0.3372549, g: 0.21176471, b: 0.34509805, a: 1}
+  colorSol: {r: 1, g: 0.4392157, b: 0.28235295, a: 1}
+  intensidadSol: 0.5
+  alturaSol: 5
+  giroSol: -72
+  colorAmbiente: {r: 0.4392157, g: 0.3372549, b: 0.45490196, a: 1}

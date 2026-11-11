@@ -1,0 +1,78 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1eaf53d818a5842cd875e54364bb0800, type: 3}
+  m_Name: 2 Monterrey
+  m_EditorClassIdentifier: Assembly-CSharp::NivelRuta
+  numero: 2
+  ciudad: Monterrey
+  escena: Monterrey
+  metrosTerminal: 2000
+  velocidadInicial: 60
+  velocidadMaxima: 145
+  metrosHastaMaxima: 2000
+  curvaDificultad:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 2.0588236
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.2
+      value: 0.4117647
+      inSlope: 2.0588236
+      outSlope: 1.4705883
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.4
+      value: 0.7058824
+      inSlope: 1.4705883
+      outSlope: 0.5882353
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.7
+      value: 0.88235295
+      inSlope: 0.5882353
+      outSlope: 0.3921568
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0.3921568
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  etapas:
+  - {fileID: 11400000, guid: 3122b0ddec3944aefbfe48db4b5694bc, type: 2}
+  - {fileID: 11400000, guid: ce767af23be974c4f9a982d3b24ea423, type: 2}
+  - {fileID: 11400000, guid: a51e25a8554c844c9947a9492d6fdbc3, type: 2}
+  rebasesLocosDesde: 800
+  colorCiudad: {r: 0.87058824, g: 0.43137255, b: 0.15686275, a: 1}

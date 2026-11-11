@@ -8,9 +8,18 @@ using UnityEngine.InputSystem;
 //   Y  brinca con la barra, W, flecha arriba o el botón BRINCAR, y sube y baja al pasar los topes; desde 120 km/h hay que
 //      brincarlos: pasar uno sin brincar lo avisa con el evento TopeSinBrincar (ControlPartida le quita una vida y lo frena).
 // Si choca con un obstáculo se detiene y lo avisa con el evento Choco; ControlPartida lo regresa a la salida con Reiniciar.
+// En un nivel (4.5), la velocidad la dice el nivel (NivelRuta) y no la del Inspector; al pasar la terminal el camión deja de
+// obedecer los controles, frena hasta pararse y lo avisa con el evento Llego.
 [RequireComponent(typeof(Rigidbody))]
 public class CamionRuta : MonoBehaviour
 {
+    [Header("Nivel")]
+    [Tooltip("El nivel que se juega en la escena: su velocidad inicial, su velocidad máxima y su curva mandan sobre las de abajo. " +
+             "Vacío en la ruta libre.")]
+    [SerializeField] NivelRuta nivel;
+    [Tooltip("Al pasar la terminal, cuántos km/h por segundo frena hasta pararse.")]
+    [SerializeField, Min(1f)] float frenadoEnTerminal = 45f;
+
     [Header("Avance (eje Z) y curva de dificultad")]
     [Tooltip("Velocidad al salir, en km/h.")]
     [SerializeField] float velocidadInicial = 36f;
@@ -54,9 +63,13 @@ public class CamionRuta : MonoBehaviour
 
     public event System.Action Choco;
     public event System.Action TopeSinBrincar;
+    public event System.Action Llego;
 
     public int Carril => carril;
     public bool Detenido => detenido;
+    public bool Llegando { get; private set; }     // ya pasó la terminal y va frenando
+    public bool EnTerminal { get; private set; }   // ya se paró en la terminal
+    public NivelRuta Nivel => nivel;
     public bool EnElSuelo { get; private set; }
     public float Metros => Mathf.Max(0f, cuerpo.position.z - salidaZ);
     public float VelocidadActual { get; private set; }   // en km/h
@@ -74,13 +87,20 @@ public class CamionRuta : MonoBehaviour
         cuerpo.constraints = RigidbodyConstraints.FreezeRotation;
         PosicionSalida = cuerpo.position;
         salidaZ = PosicionSalida.z;
+        if (nivel != null)
+        {
+            velocidadInicial = nivel.velocidadInicial;
+            velocidadMaxima = nivel.velocidadMaxima;
+            metrosHastaMaxima = nivel.metrosHastaMaxima;
+            curvaDificultad = nivel.curvaDificultad;
+        }
         VelocidadActual = velocidadInicial;
     }
 
     void Update()
     {
         var teclado = Keyboard.current;
-        if (teclado == null || detenido || (navegacion != null && navegacion.EnPausa))
+        if (teclado == null || detenido || Llegando || (navegacion != null && navegacion.EnPausa))
         {
             return;
         }
@@ -133,10 +153,32 @@ public class CamionRuta : MonoBehaviour
                 vy = subidaMaxima;
             }
         }
-        // La curva manda; si un tope lo frenó, recupera poco a poco hasta alcanzarla otra vez.
-        VelocidadActual = Mathf.Min(VelocidadEn(Metros), VelocidadActual + recuperacionKmhPorSegundo * Time.fixedDeltaTime);
+        if (Llegando)
+        {
+            // Pasó la terminal: frena parejo hasta pararse y avisa una sola vez.
+            VelocidadActual = Mathf.MoveTowards(VelocidadActual, 0f, frenadoEnTerminal * Time.fixedDeltaTime);
+            if (VelocidadActual <= 0f && !EnTerminal)
+            {
+                EnTerminal = true;
+                Llego?.Invoke();
+            }
+        }
+        else
+        {
+            // La curva manda; si un tope lo frenó, recupera poco a poco hasta alcanzarla otra vez.
+            VelocidadActual = Mathf.Min(VelocidadEn(Metros), VelocidadActual + recuperacionKmhPorSegundo * Time.fixedDeltaTime);
+        }
         ordenZ = VelocidadActual / KmhPorMetroPorSegundo;
         cuerpo.linearVelocity = new Vector3(vx, vy, ordenZ);
+    }
+
+    // ControlPartida lo llama al pasar la terminal del nivel.
+    public void LlegarATerminal()
+    {
+        if (!detenido)
+        {
+            Llegando = true;
+        }
     }
 
     // La velocidad en km/h que lleva a esos metros de la salida, según la curva de dificultad. El generador la usa para saber
@@ -155,7 +197,7 @@ public class CamionRuta : MonoBehaviour
     // Termina la partida como un choque: con un obstáculo o al quedarse sin vidas en un tope.
     public void Detener(Collider causa)
     {
-        if (detenido)
+        if (detenido || Llegando)
         {
             return;
         }
@@ -170,7 +212,7 @@ public class CamionRuta : MonoBehaviour
 
     public void Brincar()
     {
-        if (!detenido)
+        if (!detenido && !Llegando)
         {
             brincoPedido = true;
         }
@@ -178,7 +220,7 @@ public class CamionRuta : MonoBehaviour
 
     void CambiarCarril(int direccion)
     {
-        if (detenido)
+        if (detenido || Llegando)
         {
             return;
         }
@@ -198,6 +240,8 @@ public class CamionRuta : MonoBehaviour
     public void Reiniciar()
     {
         detenido = false;
+        Llegando = false;
+        EnTerminal = false;
         UltimoChoque = null;
         UltimoTope = null;
         brincoPedido = false;
@@ -213,7 +257,7 @@ public class CamionRuta : MonoBehaviour
 
     void OnCollisionEnter(Collision choque)
     {
-        if (detenido)
+        if (detenido || Llegando)
         {
             return;
         }

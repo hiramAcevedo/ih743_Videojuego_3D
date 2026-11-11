@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc0a86ecd74874cca9dc9ca33729cef9, type: 3}
+  m_Name: MTY 1 Trafico medio
+  m_EditorClassIdentifier: Assembly-CSharp::EtapaAvenida
+  nombre: "Tr\xE1fico medio"
+  desdeMetro: 0
+  porciones:
+  - nombre: Cuadra de casas
+    prefab: {fileID: 1972248700560372036, guid: a9b93bab9ba9a45678e1165f0d58c6dd, type: 3}
+    peso: 2
+  - nombre: Cuadra de comercios A
+    prefab: {fileID: 547994176714248909, guid: ccadeaf373ae5418e8094d60fba4908e, type: 3}
+    peso: 2
+  - nombre: Cuadra de comercios B
+    prefab: {fileID: 5762158417282673870, guid: 680b9f1506b404162afb760485468e03, type: 3}
+    peso: 2
+  - nombre: Cruce con paso peatonal
+    prefab: {fileID: 4676380370361151849, guid: 1f30e80f5dd434e6cb724adc3f0613f4, type: 3}
+    peso: 2
+  separacionMinima: 24
+  separacionMaxima: 32
+  probabilidadDosAutos: 0.35
+  probabilidadTope: 0.28
+  rebasesPorKilometro: 4
+  colorCielo: {r: 0.93333334, g: 0.8392157, b: 0.65882355, a: 1}
+  colorSol: {r: 1, g: 0.9254902, b: 0.78431374, a: 1}
+  intensidadSol: 1.45
+  alturaSol: 64
+  giroSol: -24
+  colorAmbiente: {r: 0.9254902, g: 0.84705883, b: 0.72156864, a: 1}

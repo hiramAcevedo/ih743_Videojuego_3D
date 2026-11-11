@@ -1,0 +1,88 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1eaf53d818a5842cd875e54364bb0800, type: 3}
+  m_Name: 1 Guadalajara
+  m_EditorClassIdentifier: Assembly-CSharp::NivelRuta
+  numero: 1
+  ciudad: Guadalajara
+  escena: Guadalajara
+  metrosTerminal: 1200
+  velocidadInicial: 36
+  velocidadMaxima: 200
+  metrosHastaMaxima: 5000
+  curvaDificultad:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 2.8883185
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.076
+      value: 0.2195122
+      inSlope: 2.8883185
+      outSlope: 1.1309993
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.2
+      value: 0.3597561
+      inSlope: 1.1309993
+      outSlope: 0.9146338
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.3
+      value: 0.4512195
+      inSlope: 0.9146338
+      outSlope: 0.8130081
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.6
+      value: 0.69512194
+      inSlope: 0.8130081
+      outSlope: 0.76219517
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0.76219517
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  etapas:
+  - {fileID: 11400000, guid: 08d0f7ae3c9be47339a72e2966f5852c, type: 2}
+  - {fileID: 11400000, guid: 0ffac476911524c4393ab6e0c4bf09f4, type: 2}
+  - {fileID: 11400000, guid: 72328041a2adb41b1b8f7ec8dfc22794, type: 2}
+  - {fileID: 11400000, guid: 0bf9014155e8f47b28cc410cc1072814, type: 2}
+  rebasesLocosDesde: 2500
+  colorCiudad: {r: 0.19607843, g: 0.6509804, b: 0.24313726, a: 1}

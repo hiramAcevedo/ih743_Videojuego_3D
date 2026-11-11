@@ -9,6 +9,12 @@ EditorBuildSettings:
     path: Assets/Scenes/Menu.unity
     guid: 08e23462ec738406494fbfbfc62e7897
   - enabled: 1
+    path: Assets/Scenes/Guadalajara.unity
+    guid: e6d65f09412ca4bc1882c47aa51ed70a
+  - enabled: 1
+    path: Assets/Scenes/Monterrey.unity
+    guid: 97e01a4fcc10f4ae7a41f74c65344f46
+  - enabled: 1
     path: Assets/Scenes/Ruta.unity
     guid: 36633cfa0e0ca450ea565d585b8ed596
   m_configObjects:

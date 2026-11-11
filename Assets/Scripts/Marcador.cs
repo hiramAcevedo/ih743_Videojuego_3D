@@ -5,11 +5,19 @@ using UnityEngine.UI;
 // velocímetro, en la esquina inferior derecha, dice a cuántos km/h va. El récord es la mejor distancia: se guarda con
 // PlayerPrefs al terminar la partida (choque o regreso al menú desde la pausa), así que sigue ahí la próxima vez que se abre
 // el juego. Debajo del récord va el nombre de la etapa que rige; al cambiar se resalta unos segundos. En el menú, sin camión,
-// sólo muestra el récord.
+// sólo muestra el récord. En un nivel (4.5) el récord no se guarda (es de la ruta libre): en su lugar va la ciudad con los
+// metros que faltan para la terminal, y debajo una barra que se llena conforme el camión se acerca.
 public class Marcador : MonoBehaviour
 {
     public const string ClaveRecord = "RecordMetros";
 
+    [Header("Nivel")]
+    [Tooltip("El nivel de la escena; vacío en el menú y en la ruta libre.")]
+    [SerializeField] NivelRuta nivel;
+    [Tooltip("La barra de avance hacia la terminal: una imagen de tipo Filled.")]
+    [SerializeField] Image barraAvance;
+
+    [Header("Marcador")]
     [SerializeField] CamionRuta camion;
     [SerializeField] Text textoMetros;
     [Tooltip("El velocímetro: la velocidad del camión en km/h.")]
@@ -71,7 +79,7 @@ public class Marcador : MonoBehaviour
     // Guarda la distancia de la partida si supera el récord; dice si fue récord nuevo.
     public bool Guardar()
     {
-        if (!enAvenida || guardado)
+        if (!enAvenida || guardado || nivel != null)
         {
             return false;
         }
@@ -131,11 +139,25 @@ public class Marcador : MonoBehaviour
     {
         if (textoMetros != null)
         {
-            textoMetros.text = metros + " m";
+            textoMetros.text = Formato.Metros(metros);
+        }
+        if (nivel != null)
+        {
+            // La ciudad y lo que falta para la terminal, en el renglón del récord; la barra, debajo.
+            float faltan = Mathf.Max(0f, nivel.metrosTerminal - metros);
+            if (textoRecord != null)
+            {
+                textoRecord.text = faltan > 0f ? nivel.ciudad + " · faltan " + Formato.Metros(faltan) : nivel.ciudad + " · ¡terminal!";
+            }
+            if (barraAvance != null)
+            {
+                barraAvance.fillAmount = Mathf.Clamp01(metros / nivel.metrosTerminal);
+            }
+            return;
         }
         if (textoRecord != null)
         {
-            textoRecord.text = "Récord: " + record + " m";
+            textoRecord.text = "Récord: " + Formato.Metros(record);
         }
     }
 }

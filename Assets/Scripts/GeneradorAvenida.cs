@@ -6,8 +6,21 @@ using UnityEngine;
 // EtapaAvenida) decide qué porción sale en cada tramo y cómo se reparten sus filas de obstáculos: uno o dos autos parados,
 // siempre con un carril libre, o un tope de lado a lado. También decide cada cuánto sale un auto por detrás a rebasar al camión
 // (AutoQueRebasa). ControlPartida llama a Reiniciar cuando se vuelve a empezar.
+// En un nivel (4.5) las etapas son las del nivel, la avenida sigue armándose después de la terminal para que no se vea el vacío,
+// pero sin obstáculos desde unos metros antes de ella, y ya no salen autos a rebasar cuando falta poco para llegar.
 public class GeneradorAvenida : MonoBehaviour
 {
+    [Header("Nivel")]
+    [Tooltip("El nivel que se juega en la escena: sus etapas, la terminal y desde dónde salen los autos locos mandan sobre las de " +
+             "abajo. Vacío en la ruta libre, la avenida sin fin.")]
+    [SerializeField] NivelRuta nivel;
+    [Tooltip("La terminal: el arco con el letrero de la ciudad y la raya de llegada. Se pone una vez, a los metros del nivel.")]
+    [SerializeField] GameObject terminal;
+    [Tooltip("Metros antes de la terminal desde los que ya no salen filas de obstáculos.")]
+    [SerializeField, Min(0f)] float libreAntesDeTerminal = 45f;
+    [Tooltip("Metros antes de la terminal desde los que ya no sale ningún auto a rebasar.")]
+    [SerializeField, Min(0f)] float sinRebasesAntesDeTerminal = 220f;
+
     [Header("Tramos")]
     [Tooltip("Largo de cada tramo en metros; las porciones están hechas para este largo.")]
     [SerializeField, Min(10f)] float largoTramo = 40f;
@@ -91,9 +104,16 @@ public class GeneradorAvenida : MonoBehaviour
     public int SemillaUsada { get; private set; }
     public int RebasesSalidos { get; private set; }
     public AutoQueRebasa RebaseActivo => rebaseActivo;
+    public NivelRuta Nivel => nivel;
+    public Transform Terminal { get; private set; }
 
     void Awake()
     {
+        if (nivel != null)
+        {
+            etapas = new List<EtapaAvenida>(nivel.etapas);
+            rebasesLocosDesde = nivel.rebasesLocosDesde;
+        }
         suelo = new GameObject("Suelo").transform;
         suelo.SetParent(transform, false);
         var caja = suelo.gameObject.AddComponent<BoxCollider>();
@@ -173,7 +193,43 @@ public class GeneradorAvenida : MonoBehaviour
         TramosCreados = 0;
         TramosDestruidos = 0;
         ColocarSuelo(origenZ);
+        PonerTerminal();
         Update();
+    }
+
+    // La terminal del nivel, a sus metros de la salida, con el nombre de la ciudad y su color en el letrero, que brilla un poco.
+    void PonerTerminal()
+    {
+        if (Terminal != null)
+        {
+            Destroy(Terminal.gameObject);
+            Terminal = null;
+        }
+        if (nivel == null || terminal == null)
+        {
+            return;
+        }
+        Terminal = Instantiate(terminal, new Vector3(0f, 0f, origenZ + nivel.metrosTerminal), Quaternion.identity, transform).transform;
+        Terminal.name = "Terminal " + nivel.ciudad;
+        foreach (var letrero in Terminal.GetComponentsInChildren<TextMesh>(true))
+        {
+            if (letrero.name == "Ciudad")
+            {
+                letrero.text = nivel.ciudad.ToUpperInvariant();
+            }
+        }
+        foreach (var r in Terminal.GetComponentsInChildren<MeshRenderer>(true))
+        {
+            if (r.name == "Letrero")
+            {
+                var bloque = new MaterialPropertyBlock();
+                r.GetPropertyBlock(bloque);
+                bloque.SetColor("_BaseColor", nivel.colorCiudad);
+                // Brilla un poco con el mismo color, para que se lea también de noche.
+                bloque.SetColor("_EmissionColor", nivel.colorCiudad * 0.8f);
+                r.SetPropertyBlock(bloque);
+            }
+        }
     }
 
     // La etapa que rige en un metro de la avenida: la última de la lista cuyo inicio ya pasó.
@@ -198,7 +254,9 @@ public class GeneradorAvenida : MonoBehaviour
         TramosCreados++;
         tramo.name = "Tramo " + TramosCreados + " · " + prefab.name;
         float fin = zTramo + largoTramo;
-        while (zFila < fin)
+        // En un nivel, la última fila queda unos metros antes de la terminal: de ahí en adelante la avenida va libre.
+        float limite = nivel != null ? origenZ + nivel.metrosTerminal - libreAntesDeTerminal : float.MaxValue;
+        while (zFila < fin && zFila < limite)
         {
             var etapaFila = EtapaEn(zFila - origenZ);
             CrearFila(tramo, zFila, etapaFila);
@@ -336,11 +394,15 @@ public class GeneradorAvenida : MonoBehaviour
     // camión; si no hay, lo intenta 10 m después.
     void ProgramarRebases()
     {
-        if (autosQueRebasan == null || autosQueRebasan.Length == 0 || camion.Detenido)
+        if (autosQueRebasan == null || autosQueRebasan.Length == 0 || camion.Detenido || camion.Llegando)
         {
             return;
         }
         float metro = camion.Metros;
+        if (nivel != null && metro > nivel.metrosTerminal - sinRebasesAntesDeTerminal)
+        {
+            return;
+        }
         var etapa = EtapaEn(metro);
         if (etapa != etapaRebases)
         {
