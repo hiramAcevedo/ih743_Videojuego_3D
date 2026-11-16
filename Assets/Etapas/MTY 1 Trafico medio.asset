@@ -31,6 +31,8 @@ MonoBehaviour:
   separacionMaxima: 32
   probabilidadDosAutos: 0.35
   probabilidadTope: 0.28
+  probabilidadOndaVerde: 0.5
+  barrasTrafico: 2
   rebasesPorKilometro: 4
   colorCielo: {r: 0.93333334, g: 0.8392157, b: 0.65882355, a: 1}
   colorSol: {r: 1, g: 0.9254902, b: 0.78431374, a: 1}

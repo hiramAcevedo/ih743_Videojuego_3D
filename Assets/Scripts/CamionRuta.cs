@@ -10,6 +10,10 @@ using UnityEngine.InputSystem;
 // Si choca con un obstáculo se detiene y lo avisa con el evento Choco; ControlPartida lo regresa a la salida con Reiniciar.
 // En un nivel (4.5), la velocidad la dice el nivel (NivelRuta) y no la del Inspector; al pasar la terminal el camión deja de
 // obedecer los controles, frena hasta pararse y lo avisa con el evento Llego.
+// 4.6: el freno y el acelerador actúan mientras se mantienen (la zona de abajo al centro, S o flecha abajo y Shift); al
+// soltarlos vuelve a la velocidad de su curva. El acelerón (Aceleron: la onda verde y el poder sin topes) lo sube unos km/h
+// sobre la curva unos segundos; el acelerador y el acelerón no se suman, manda el mayor, y pisar el freno corta el acelerón.
+// También lleva la cuenta de los topes que tocó, para que PoderSinTopes sepa cuáles se brincaron.
 [RequireComponent(typeof(Rigidbody))]
 public class CamionRuta : MonoBehaviour
 {
@@ -47,6 +51,20 @@ public class CamionRuta : MonoBehaviour
     [Tooltip("Después de frenar por un tope, cuántos km/h por segundo recupera hasta volver a la curva de dificultad.")]
     [SerializeField, Min(1f)] float recuperacionKmhPorSegundo = 25f;
 
+    [Header("Freno y acelerador (4.6)")]
+    [Tooltip("Cuántos km/h por segundo baja mientras se pisa el freno.")]
+    [SerializeField, Min(1f)] float frenadoKmhPorSegundo = 70f;
+    [Tooltip("Lo más que baja con el freno, en km/h: en la avenida el camión no se para.")]
+    [SerializeField, Min(0f)] float velocidadMinimaConFreno = 30f;
+    [Tooltip("Cuántos km/h arriba de su curva llega mientras se pisa el acelerador.")]
+    [SerializeField, Min(0f)] float extraConAceleradorKmh = 25f;
+    [Tooltip("Cuántos km/h por segundo sube mientras se pisa el acelerador.")]
+    [SerializeField, Min(1f)] float aceleracionKmhPorSegundo = 40f;
+    [Tooltip("Al soltar el acelerador o al terminar el acelerón, cuántos km/h por segundo baja hasta su curva.")]
+    [SerializeField, Min(1f)] float regresoKmhPorSegundo = 35f;
+    [Tooltip("El acelerón de la onda verde y del poder sin topes, con su estela.")]
+    [SerializeField] Aceleron aceleron;
+
     [Header("Avisos")]
     [SerializeField] Navegacion navegacion;
 
@@ -61,6 +79,9 @@ public class CamionRuta : MonoBehaviour
     bool detenido;
     float salidaZ;
     float ordenZ;            // la velocidad hacia adelante que se pidió en el paso anterior, en m/s
+    bool frenoTactil, aceleradorTactil;     // la zona de abajo al centro, mientras se mantiene el dedo
+    bool frenoTeclado, aceleradorTeclado;   // S o flecha abajo, y Shift
+    readonly System.Collections.Generic.HashSet<Collider> topesTocados = new System.Collections.Generic.HashSet<Collider>();
 
     public event System.Action Choco;
     public event System.Action TopeSinBrincar;
@@ -78,6 +99,10 @@ public class CamionRuta : MonoBehaviour
     public bool CambiandoDeCarril => Mathf.Abs(cuerpo.position.x - carril * anchoCarril) > 0.25f;   // va entre dos carriles
     public Collider UltimoChoque { get; private set; }   // con qué chocó: un auto parado, uno que venía rebasando o un tope
     public Collider UltimoTope { get; private set; }     // el último tope que pasó sin brincar a más de 120 km/h
+    public bool Brincando => brincando;
+    public bool Frenando => !detenido && !Llegando && (frenoTactil || frenoTeclado);
+    public bool Acelerando => !detenido && !Llegando && !Frenando && (aceleradorTactil || aceleradorTeclado);
+    public Aceleron Aceleron => aceleron;
 
     void Awake()
     {
@@ -103,7 +128,15 @@ public class CamionRuta : MonoBehaviour
         var teclado = Keyboard.current;
         if (teclado == null || detenido || Llegando || (navegacion != null && navegacion.EnPausa))
         {
+            frenoTeclado = aceleradorTeclado = false;
             return;
+        }
+        bool frenaba = Frenando;
+        frenoTeclado = teclado.sKey.isPressed || teclado.downArrowKey.isPressed;
+        aceleradorTeclado = teclado.leftShiftKey.isPressed || teclado.rightShiftKey.isPressed;
+        if (!frenaba && Frenando)
+        {
+            AlPisarElFreno();
         }
         if (teclado.leftArrowKey.wasPressedThisFrame || teclado.aKey.wasPressedThisFrame)
         {
@@ -166,8 +199,30 @@ public class CamionRuta : MonoBehaviour
         }
         else
         {
-            // La curva manda; si un tope lo frenó, recupera poco a poco hasta alcanzarla otra vez.
-            VelocidadActual = Mathf.Min(VelocidadEn(Metros), VelocidadActual + recuperacionKmhPorSegundo * Time.fixedDeltaTime);
+            // La curva manda, más lo que dé el acelerador o el acelerón (el mayor de los dos). Con el freno baja hasta su mínimo;
+            // si un tope o el freno lo bajaron, recupera poco a poco hasta alcanzar la curva otra vez, y al soltar el acelerador
+            // o terminar el acelerón regresa a ella.
+            float dt = Time.fixedDeltaTime;
+            float extra = Acelerando ? extraConAceleradorKmh : 0f;
+            bool conAceleron = aceleron != null && aceleron.Activo;
+            if (conAceleron)
+            {
+                extra = Mathf.Max(extra, aceleron.KmhDeMas);
+            }
+            float objetivo = VelocidadEn(Metros) + extra;
+            if (Frenando)
+            {
+                VelocidadActual = Mathf.MoveTowards(VelocidadActual, Mathf.Min(velocidadMinimaConFreno, objetivo), frenadoKmhPorSegundo * dt);
+            }
+            else if (VelocidadActual < objetivo)
+            {
+                float sube = conAceleron ? aceleron.SubidaKmhPorSegundo : Acelerando ? aceleracionKmhPorSegundo : recuperacionKmhPorSegundo;
+                VelocidadActual = Mathf.Min(objetivo, VelocidadActual + sube * dt);
+            }
+            else
+            {
+                VelocidadActual = Mathf.Max(objetivo, VelocidadActual - regresoKmhPorSegundo * dt);
+            }
         }
         ordenZ = VelocidadActual / KmhPorMetroPorSegundo;
         cuerpo.linearVelocity = new Vector3(vx, vy, ordenZ);
@@ -207,7 +262,7 @@ public class CamionRuta : MonoBehaviour
         Choco?.Invoke();
     }
 
-    // Los botones de la pantalla llaman a estos tres métodos.
+    // Las zonas táctiles (ControlesTactiles) llaman a estos métodos.
     public void CarrilIzquierdo() => CambiarCarril(-1);
     public void CarrilDerecho() => CambiarCarril(1);
 
@@ -218,6 +273,31 @@ public class CamionRuta : MonoBehaviour
             brincoPedido = true;
         }
     }
+
+    // El freno y el acelerador de la pantalla: actúan mientras se mantiene el dedo.
+    public void PisarFreno(bool pisado)
+    {
+        bool frenaba = Frenando;
+        frenoTactil = pisado;
+        if (!frenaba && Frenando)
+        {
+            AlPisarElFreno();
+        }
+    }
+
+    public void PisarAcelerador(bool pisado) => aceleradorTactil = pisado;
+
+    // La estela dice que el camión va más rápido: al frenar, el acelerón se acaba.
+    void AlPisarElFreno()
+    {
+        if (aceleron != null)
+        {
+            aceleron.Cortar();
+        }
+    }
+
+    // Si el camión ya tocó ese tope: el que pasa por la rampa sin brincar lo toca; el que se brinca, no.
+    public bool Toco(Collider tope) => topesTocados.Contains(tope);
 
     void CambiarCarril(int direccion)
     {
@@ -247,6 +327,8 @@ public class CamionRuta : MonoBehaviour
         UltimoTope = null;
         brincoPedido = false;
         brincando = false;
+        frenoTactil = aceleradorTactil = frenoTeclado = aceleradorTeclado = false;
+        topesTocados.Clear();
         carril = 0;
         VelocidadActual = velocidadInicial;
         ordenZ = 0f;
@@ -261,6 +343,14 @@ public class CamionRuta : MonoBehaviour
         if (detenido || Llegando)
         {
             return;
+        }
+        if (choque.collider.CompareTag("Tope"))
+        {
+            if (topesTocados.Count > 64)
+            {
+                topesTocados.RemoveWhere(t => t == null);
+            }
+            topesTocados.Add(choque.collider);
         }
         if (choque.collider.CompareTag("Obstaculo"))
         {

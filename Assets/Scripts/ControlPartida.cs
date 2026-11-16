@@ -9,6 +9,9 @@ using UnityEngine.UI;
 // En un nivel (4.5) la partida también termina bien: al pasar la terminal el nivel queda terminado (PlayerPrefs), el camión
 // frena y, ya parado, aparece el aviso de nivel completado con SIGUIENTE NIVEL; después del último, el de fin de la ruta. En los
 // niveles no se guarda récord: el récord es de la ruta libre.
+// 4.6: las vidas son tres corazones dibujados (imágenes) en el tablero nuevo, los avisos salen con Aviso arriba de los metros y
+// los km/h, y al jugar de nuevo se apagan el acelerón y el poder activo; lo brincado y el poder guardado se quedan para el
+// intento nuevo (PoderSinTopes).
 public class ControlPartida : MonoBehaviour
 {
     [Header("Nivel")]
@@ -40,18 +43,22 @@ public class ControlPartida : MonoBehaviour
     [SerializeField, Min(1)] int vidasIniciales = 3;
     [Tooltip("La velocidad, en km/h, a la que baja el camión al perder una vida en un tope.")]
     [SerializeField, Min(0f)] float velocidadTrasTope = 32f;
-    [Tooltip("Los corazones, arriba a la derecha.")]
-    [SerializeField] Text textoVidas;
-    [Tooltip("El aviso que sale unos segundos al perder una vida.")]
-    [SerializeField] Text textoAviso;
+    [Tooltip("Los corazones, arriba a la derecha, uno por vida.")]
+    [SerializeField] Image[] corazones;
+    [SerializeField] Color colorVida = new Color32(232, 50, 60, 255);
+    [SerializeField] Color colorVidaPerdida = new Color32(255, 255, 255, 70);
+    [Tooltip("El aviso que sale unos segundos al perder una vida o al pasar la terminal.")]
+    [SerializeField] Aviso aviso;
+    [SerializeField] Color colorAviso = new Color32(255, 204, 51, 255);
     [SerializeField, Min(0f)] float segundosAviso = 1.6f;
+
+    [Header("4.6")]
+    [SerializeField] PoderSinTopes poder;
 
     public int Partida { get; private set; } = 1;
     public int Vidas { get; private set; }
     public NivelRuta Nivel => nivel;
     public NivelRuta SiguienteNivel => nivel != null && ruta != null ? ruta.Siguiente(nivel) : null;
-
-    float avisoHasta;
 
     void Awake()
     {
@@ -86,10 +93,6 @@ public class ControlPartida : MonoBehaviour
 
     void Update()
     {
-        if (avisoHasta > 0f && Time.time >= avisoHasta)
-        {
-            Avisar("");
-        }
         // La terminal: el nivel se guarda como terminado en cuanto se pasa, aunque se salga antes de que el camión se pare.
         if (nivel != null && !camion.Llegando && !camion.Detenido && camion.Metros >= nivel.metrosTerminal)
         {
@@ -165,25 +168,33 @@ public class ControlPartida : MonoBehaviour
 
     void PintarVidas()
     {
-        if (textoVidas == null)
+        if (corazones == null)
         {
             return;
         }
-        var corazones = new System.Text.StringBuilder();
-        for (int i = 0; i < vidasIniciales; i++)
+        for (int i = 0; i < corazones.Length; i++)
         {
-            corazones.Append(i > 0 ? " " : "").Append(i < Vidas ? "<color=#E8323C>♥</color>" : "<color=#FFFFFF55>♥</color>");
+            if (corazones[i] != null)
+            {
+                corazones[i].color = i < Vidas ? colorVida : colorVidaPerdida;
+            }
         }
-        textoVidas.text = corazones.ToString();
     }
 
     void Avisar(string texto)
     {
-        if (textoAviso != null)
+        if (aviso == null)
         {
-            textoAviso.text = texto;
+            return;
         }
-        avisoHasta = texto.Length > 0 ? Time.time + segundosAviso : 0f;
+        if (texto.Length == 0)
+        {
+            aviso.Borrar();
+        }
+        else
+        {
+            aviso.Mostrar(texto, colorAviso, segundosAviso);
+        }
     }
 
     void Perdio()
@@ -228,8 +239,16 @@ public class ControlPartida : MonoBehaviour
     public void ReiniciarNivel()
     {
         camion.Reiniciar();
+        if (camion.Aceleron != null)
+        {
+            camion.Aceleron.Reiniciar();
+        }
         generador.Reiniciar();
         marcador.Reiniciar();
+        if (poder != null)
+        {
+            poder.Reiniciar();
+        }
         Vidas = vidasIniciales;
         PintarVidas();
         Avisar("");

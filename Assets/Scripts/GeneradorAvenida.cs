@@ -8,6 +8,9 @@ using UnityEngine;
 // (AutoQueRebasa). ControlPartida llama a Reiniciar cuando se vuelve a empezar.
 // En un nivel (4.5) las etapas son las del nivel, la avenida sigue armándose después de la terminal para que no se vea el vacío,
 // pero sin obstáculos desde unos metros antes de ella, y ya no salen autos a rebasar cuando falta poco para llegar.
+// 4.6: en algunos cruces pone la franja de la onda verde (OndaVerde) al pie del semáforo, en un carril que la fila anterior dejó
+// libre, y no pone filas detrás de ella lo que dura el acelerón a la velocidad más alta que puede llevar el camión: tomarla nunca
+// lleva a un choque. También lleva la lista de los topes en pie, para el poder sin topes.
 public class GeneradorAvenida : MonoBehaviour
 {
     [Header("Nivel")]
@@ -43,6 +46,14 @@ public class GeneradorAvenida : MonoBehaviour
     [Tooltip("Segundos que siempre quedan para pasarse al carril de junto entre una fila y la siguiente: a más velocidad, las " +
              "filas se separan más metros que los de la etapa si hace falta.")]
     [SerializeField, Min(0f)] float segundosMinimosEntreFilas = 0.3f;
+
+    [Header("Onda verde (4.6)")]
+    [Tooltip("La franja verde que se pone en un carril de algunos cruces; cada etapa dice qué tan seguido.")]
+    [SerializeField] GameObject ondaVerde;
+    [Tooltip("Metros de más sin filas de obstáculos después de lo que recorre el camión con el acelerón.")]
+    [SerializeField, Min(0f)] float margenTrasOndaVerde = 30f;
+    [Tooltip("Metros antes de la terminal desde los que ya no sale onda verde.")]
+    [SerializeField, Min(0f)] float sinOndaVerdeAntesDeTerminal = 300f;
 
     [Header("Autos que rebasan")]
     [Tooltip("Prefabs de los autos que vienen por detrás a rebasar al camión; cada uno trae su AutoQueRebasa. Cuántos salen lo " +
@@ -95,6 +106,9 @@ public class GeneradorAvenida : MonoBehaviour
     GameObject ultimaPorcion;
     AutoQueRebasa rebaseActivo;              // el último que salió
     readonly List<AutoQueRebasa> rebases = new List<AutoQueRebasa>();
+    readonly List<Collider> topes = new List<Collider>();       // los topes en pie, para el poder sin topes
+    readonly List<OndaVerde> ondas = new List<OndaVerde>();
+    Aceleron aceleron;
     EtapaAvenida etapaRebases;   // la etapa con la que se programó el siguiente rebase
     float proximoRebase;         // metro de la avenida en que sale el siguiente auto que rebasa; -1 si la etapa no trae
 
@@ -106,6 +120,9 @@ public class GeneradorAvenida : MonoBehaviour
     public AutoQueRebasa RebaseActivo => rebaseActivo;
     public NivelRuta Nivel => nivel;
     public Transform Terminal { get; private set; }
+    public IReadOnlyList<Collider> Topes => topes;
+    public IReadOnlyList<OndaVerde> Ondas => ondas;
+    public int OndasPuestas { get; private set; }
 
     void Awake()
     {
@@ -120,6 +137,10 @@ public class GeneradorAvenida : MonoBehaviour
         caja.size = new Vector3(anchoCarril * carriles, 0.2f, LargoSuelo);
         contenedorRebases = new GameObject("Autos que rebasan").transform;
         contenedorRebases.SetParent(transform, false);
+        if (camion != null)
+        {
+            aceleron = camion.GetComponent<Aceleron>();
+        }
     }
 
     void Start()
@@ -144,6 +165,8 @@ public class GeneradorAvenida : MonoBehaviour
         {
             Destroy(tramos.Dequeue().gameObject);
             TramosDestruidos++;
+            topes.RemoveAll(t => t == null || t.transform.position.z < z - margenDetras);
+            ondas.RemoveAll(o => o == null || o.transform.position.z < z - margenDetras);
         }
         while (filas.Count > 0 && filas.Peek().z < z - margenDetras)
         {
@@ -178,6 +201,9 @@ public class GeneradorAvenida : MonoBehaviour
         }
         filas.Clear();
         rebases.Clear();
+        topes.Clear();
+        ondas.Clear();
+        OndasPuestas = 0;
         rebaseActivo = null;
         etapaRebases = null;
         proximoRebase = -1f;
@@ -256,6 +282,7 @@ public class GeneradorAvenida : MonoBehaviour
         float fin = zTramo + largoTramo;
         // En un nivel, la última fila queda unos metros antes de la terminal: de ahí en adelante la avenida va libre.
         float limite = nivel != null ? origenZ + nivel.metrosTerminal - libreAntesDeTerminal : float.MaxValue;
+        PonerOndaVerde(tramo, etapa);
         while (zFila < fin && zFila < limite)
         {
             var etapaFila = EtapaEn(zFila - origenZ);
@@ -266,6 +293,52 @@ public class GeneradorAvenida : MonoBehaviour
         }
         tramos.Enqueue(tramo);
         zTramo = fin;
+    }
+
+    // La onda verde: si la porción es un cruce (trae el punto «Pie del semaforo») y la etapa la sortea, la franja va en uno de los
+    // carriles que la última fila dejó libres, así siempre se alcanza. Detrás de ella no hay filas lo que recorre el camión con el
+    // acelerón a su velocidad más alta (la curva más los km/h del acelerón), más un segundo para volver a su velocidad y el margen.
+    void PonerOndaVerde(Transform tramo, EtapaAvenida etapa)
+    {
+        if (ondaVerde == null || etapa.probabilidadOndaVerde <= 0f)
+        {
+            return;
+        }
+        var pie = tramo.Find("Pie del semaforo");
+        if (pie == null || azar.NextDouble() >= etapa.probabilidadOndaVerde)
+        {
+            return;
+        }
+        float z = pie.position.z;
+        float metro = z - origenZ;
+        if (metro < salidaLibre + largoTramo || (nivel != null && metro > nivel.metrosTerminal - sinOndaVerdeAntesDeTerminal))
+        {
+            return;
+        }
+        var libres = new List<int>();
+        for (int c = 0; c < carriles; c++)
+        {
+            if ((libresAnteriores & (1 << c)) != 0)
+            {
+                libres.Add(c);
+            }
+        }
+        int carril = libres.Count > 0 ? libres[azar.Next(libres.Count)] : carriles / 2;
+        float x = (carril - (carriles - 1) / 2f) * anchoCarril;
+        var franja = Instantiate(ondaVerde, new Vector3(x, 0f, z), Quaternion.identity, tramo);
+        franja.name = "Onda verde";
+        ondas.Add(franja.GetComponent<OndaVerde>());
+        OndasPuestas++;
+        float kmh = aceleron != null ? aceleron.KmhDeMas : 35f;
+        float segundos = aceleron != null ? aceleron.Segundos : 2.5f;
+        float v = (camion.VelocidadEn(metro) + kmh) / 3.6f;
+        float libreHasta = z + v * (segundos + 1f) + margenTrasOndaVerde;
+        if (zFila < libreHasta)
+        {
+            zFila = libreHasta;
+            zFilaAnterior = libreHasta;
+            libresAnteriores = (1 << carriles) - 1;
+        }
     }
 
     // Sorteo por peso entre las porciones de la etapa, sin repetir la anterior si hay otra con qué cambiarla.
@@ -322,7 +395,12 @@ public class GeneradorAvenida : MonoBehaviour
         int todos = (1 << carriles) - 1;
         if (tope != null && azar.NextDouble() < etapa.probabilidadTope)
         {
-            Instantiate(tope, new Vector3(0f, 0f, z), Quaternion.identity, tramo);
+            var nuevo = Instantiate(tope, new Vector3(0f, 0f, z), Quaternion.identity, tramo);
+            var colision = nuevo.GetComponent<Collider>();
+            if (colision != null)
+            {
+                topes.Add(colision);
+            }
             libresAnteriores = todos;
             filas.Enqueue((z, todos));
             return;

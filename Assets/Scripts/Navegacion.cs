@@ -6,6 +6,7 @@ using UnityEngine.UI;
 // ruta libre; cómo se juega y salir. En una avenida: pausa (detiene el tiempo) con continuar, reiniciar y volver al menú; el
 // aviso de choque, que ControlPartida llena y desde el que se juega de nuevo; y en los niveles, el aviso de nivel completado
 // con SIGUIENTE NIVEL y el de fin de la ruta. Build Settings: Menu (0), Guadalajara (1), Monterrey (2) y Ruta, la ruta libre (3).
+// 4.6: el engrane abre AJUSTES, con el interruptor de las guías táctiles; en una avenida también detiene el tiempo.
 public class Navegacion : MonoBehaviour
 {
     public const string EscenaMenu = "Menu";
@@ -25,6 +26,7 @@ public class Navegacion : MonoBehaviour
     [SerializeField] GameObject panelChoque;
     [SerializeField] GameObject panelCompletado;
     [SerializeField] GameObject panelFinDeRuta;
+    [SerializeField] GameObject panelAjustes;
     [SerializeField] GameObject controles;
     [Tooltip("En el menú, la etiqueta de JUGAR: dice a qué nivel lleva.")]
     [SerializeField] Text etiquetaJugar;
@@ -85,6 +87,30 @@ public class Navegacion : MonoBehaviour
 
     public void Continuar() => MostrarJuego();
 
+    // El engrane: AJUSTES. En una avenida (la que tiene controles) detiene el tiempo como la pausa.
+    public void VerAjustes()
+    {
+        if (controles != null)
+        {
+            EnPausa = true;
+            Time.timeScale = 0f;
+        }
+        Mostrar(panelAjustes);
+    }
+
+    // CONTINUAR o VOLVER de AJUSTES: a la avenida o al menú.
+    public void CerrarAjustes()
+    {
+        if (controles != null)
+        {
+            MostrarJuego();
+        }
+        else
+        {
+            VolverAlPrincipal();
+        }
+    }
+
     // El HUD y los controles, con el tiempo corriendo: al continuar desde la pausa y al empezar otra partida.
     public void MostrarJuego()
     {
@@ -130,7 +156,7 @@ public class Navegacion : MonoBehaviour
     // Deja visible sólo el panel pedido; los controles del camión se ven únicamente mientras se maneja.
     void Mostrar(GameObject panel)
     {
-        foreach (var p in new[] { panelPrincipal, panelInstrucciones, panelNiveles, panelPausa, panelChoque, panelCompletado, panelFinDeRuta })
+        foreach (var p in new[] { panelPrincipal, panelInstrucciones, panelNiveles, panelPausa, panelChoque, panelCompletado, panelFinDeRuta, panelAjustes })
         {
             if (p != null)
             {

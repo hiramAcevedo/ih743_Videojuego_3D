@@ -5,8 +5,9 @@ using UnityEngine;
 // Una etapa de la avenida, como el Stage del tutorial: un asset que se crea con clic derecho > Create > Camión de ruta >
 // Etapa de la avenida y se ajusta en el Inspector. Dice desde qué metro rige, qué porciones (prefabs de tramo) la componen y
 // con qué peso, cómo se reparten los obstáculos en sus filas, cuántos autos por kilómetro vienen a rebasar al camión y su
-// ambiente: el color del cielo, el sol y la luz a esa hora del día (LuzDelDia pasa de uno a otro). GeneradorAvenida guarda la
-// lista de etapas en orden.
+// ambiente: el color del cielo, el sol y la luz a esa hora del día (LuzDelDia pasa de uno a otro). En la 4.6 también qué tan
+// seguido trae onda verde un cruce y cuántas barras del tráfico enciende en el tablero. GeneradorAvenida guarda la lista de
+// etapas en orden.
 [CreateAssetMenu(fileName = "Nueva etapa", menuName = "Camión de ruta/Etapa de la avenida", order = 0)]
 public class EtapaAvenida : ScriptableObject
 {
@@ -38,6 +39,14 @@ public class EtapaAvenida : ScriptableObject
     [Range(0f, 1f)] public float probabilidadDosAutos;
     [Tooltip("Probabilidad de que una fila sea un tope de lado a lado en lugar de autos.")]
     [Range(0f, 1f)] public float probabilidadTope = 0.2f;
+
+    [Header("Onda verde (4.6)")]
+    [Tooltip("Probabilidad de que un cruce de esta etapa traiga la franja de la onda verde en uno de sus carriles. Con 0 no sale.")]
+    [Range(0f, 1f)] public float probabilidadOndaVerde;
+
+    [Header("Tablero (4.6)")]
+    [Tooltip("Cuántas de las cuatro barras del tráfico se encienden en el tablero: 1 ligero, 2 medio, 3 hora pico y 4 quincena.")]
+    [Range(1, 4)] public int barrasTrafico = 1;
 
     [Header("Autos que rebasan")]
     [Tooltip("Cuántos autos por kilómetro vienen por detrás, más rápido que el camión, por el carril de al lado, lo rebasan y " +
