@@ -5,6 +5,7 @@ Desarrollo de Sistemas Web). Hiram Agustín Acevedo López.
 
 Un camión de ruta avanza solo por una avenida mexicana: hay que cambiar de carril, brincar los topes y no chocar con los
 autos parados ni con los que lo rebasan. Guadalajara y Monterrey ya son niveles; Ciudad de México será el tercero.
+En algunos cruces se agarra la onda verde, y con 10 topes brincados se guarda el poder sin topes.
 
 ## Lo que hay en la entrega 4.1
 
@@ -124,11 +125,46 @@ autos parados ni con los que lo rebasan. Guadalajara y Monterrey ya son niveles;
   falta para la terminal y una barra de avance. Cada cambio de escena lleva un fundido a negro (`Transicion`, con
   `SceneManager.LoadSceneAsync`), también al salir desde la pausa.
 
+## Lo que hay en la entrega 4.6
+
+<p align="center">
+  <img src="docs/capturas/4.6-onda-verde.png" width="270" alt="El camión con la estela verde de la onda verde, el velocímetro en verde y la barra del acelerón, en vertical">
+  <img src="docs/capturas/4.6-controles.png" width="270" alt="El tablero nuevo con las guías encendidas: los arcos de las esquinas, Salto, y el freno iluminado en rojo, en vertical">
+  <img src="docs/capturas/4.6-sin-topes.png" width="270" alt="El poder sin topes en Monterrey, en la hora pico: la estela, el aviso y el indicador con los segundos que quedan, en vertical">
+</p>
+
+- **La onda verde (el acelerón):** en algunos cruces, desde el tráfico medio, uno de los tres carriles trae una franja verde
+  al pie del semáforo. Si el camión pasa por encima, va 35 km/h arriba de su curva durante 2.5 s y después vuelve a ella.
+  La franja va en un carril que la fila anterior dejó libre y detrás de ella la avenida va libre lo que dura el acelerón, así
+  que tomarla nunca lleva a un choque. Como la súper velocidad del cap. 11, es un estado que prende un evento y se apaga solo
+  (`Aceleron`); la franja es `OndaVerde` y cada etapa dice qué tan seguido sale (`probabilidadOndaVerde`).
+- **La estela:** dos `TrailRenderer` en las esquinas de atrás del camión, de blanco verdoso a transparente, que sólo emiten
+  mientras dura el acelerón. Cada punto vive 0.4 s, así que del primero al último no pasan 3 s: `Aceleron` no deja que los
+  segundos del acelerón y los de la estela sumen más. Con la estela, la cámara abre 7° su campo de visión, el velocímetro se
+  pinta de verde, sale el aviso y una barra (un `Slider`, como la del cap. 12) se vacía mientras dura.
+- **El poder sin topes:** cada tope que el camión brinca sin tocarlo suma uno; con 10, el poder queda guardado en el
+  indicador de arriba a la izquierda. Lo brincado no se pierde hasta usar el poder: pasa de Guadalajara a Monterrey y se
+  queda al reiniciar o al perder (`PlayerPrefs`), así que los topes de Guadalajara y los de cada intento ayudan a pasar
+  Monterrey. Al tocarlo (o con la E), durante 10 s los topes que quedan a menos de 160 m se hunden en el asfalto y el camión
+  da el mismo acelerón con su estela. Los brincos, los segundos y si se usa solo se ajustan en el Inspector de
+  `PoderSinTopes`.
+- **Controles sin botones:** cada esquina de abajo, dentro de un arco chico, cambia de carril; fuera de los arcos, hacia
+  arriba, se brinca; abajo al centro, el freno a la izquierda y el acelerador a la derecha actúan mientras se mantiene el dedo
+  y al soltarlos el camión vuelve a su curva. Al tocar sólo se ilumina la zona: rojo el freno, verde el acelerador y un
+  destello en los carriles y el salto. Las guías (los arcos, las flechas y los letreros) se apagan desde la pausa o desde
+  AJUSTES, el engrane, y queda guardado con `PlayerPrefs`. Son `ZonaTactil` y `ControlesTactiles`.
+- **El tablero nuevo:** la información salió del centro para no tapar la carretera. Arriba a la izquierda, PAUSA, el engrane
+  y el indicador del poder; arriba a la derecha, los corazones y el panel con la ciudad, el tráfico con sus cuatro barras y lo
+  que falta para la terminal; abajo al centro, los metros y los km/h. Los trazos de pincel son PNG con transparencia
+  dibujados por un script, la letra es la manuscrita Kalam Bold y los avisos salen arriba de los metros.
+
 ## Controles
 
-- Teléfono: ◄ y ► cambian de carril, BRINCAR salta y PAUSA está arriba a la izquierda.
-- Computadora: flechas o A y D para el carril; barra, W o flecha arriba para brincar.
-- En el menú, PINTURA cambia la pintura del camión y NIVELES elige ciudad o la ruta libre.
+- Teléfono: la esquina de abajo a la izquierda o a la derecha cambia de carril; más arriba se brinca; abajo al centro se
+  mantienen Freno o Acelerador; el indicador del poder lo usa y PAUSA y el engrane están arriba a la izquierda.
+- Computadora: flechas o A y D para el carril; barra, W o flecha arriba para brincar; S o flecha abajo para frenar; Shift
+  para acelerar; E para usar el poder.
+- En el menú, PINTURA cambia la pintura del camión, NIVELES elige ciudad o la ruta libre y el engrane abre AJUSTES.
 
 ## Abrir el proyecto
 
@@ -146,16 +182,21 @@ y Play.
   pantalla), `Girar`, `TextoConProfundidad`, `LuzDelDia` (la hora del día de cada etapa), `PinturaCamion` (una pintura del
   camión), `PintarCamion` (aplica la pintura elegida), `BotonPintura` (el botón PINTURA del menú), `NivelRuta` (un nivel),
   `RutaNiveles` (los niveles en orden), `BotonNivel` (una tarjeta del panel NIVELES), `Transicion` (el fundido entre escenas),
-  `Horizonte` (el cerro del fondo) y `Formato` (los números con coma de miles).
+  `Horizonte` (el cerro del fondo), `Formato` (los números con coma de miles), `Aceleron` (el acelerón con sus estelas),
+  `OndaVerde` (la franja de los cruces), `PoderSinTopes`, `ZonaTactil` y `ControlesTactiles` (los controles sin botones),
+  `Guias` y `BotonGuias` (el interruptor de las guías) y `Aviso` (los avisos del tablero).
 - `Assets/Scenes/`: `Menu`, `Guadalajara`, `Monterrey` y `Ruta` (la ruta libre).
 - `Assets/Niveles/`: Guadalajara, Monterrey y la ruta de niveles.
 - `Assets/Etapas/`: Tráfico ligero, Tráfico medio, Hora pico y Viernes de quincena, y las tres de Monterrey (`MTY`).
 - `Assets/Pinturas/`: Verde Mi Transporte, Roja R-400 y Blanca R-182.
 - `Assets/Posproceso/`: el perfil del volumen, con el bloom y el viñeteado.
+- `Assets/Interfaz/Trazos/`: los trazos de pincel, los íconos y los brillos del tablero, en PNG con transparencia.
+- `Assets/Interfaz/Fuentes/`: la letra del tablero, Kalam Bold, de Indian Type Foundry, tomada de Google Fonts con licencia
+  SIL Open Font License 1.1; el texto de la licencia va junto a la letra, en `Kalam-OFL.txt`.
 - `Assets/Prefabs/`: el camión, tres autos, sus tres variantes que rebasan (con direccionales) y el tope, armados con
   figuras básicas de Unity. El camión lleva el número R-743 y la pintura elegida en el menú; el modelo definitivo llega en
-  las siguientes entregas. En `Tramos/`, las cinco porciones de la avenida (dos cuadras de casas, dos de comercios y el
-  cruce) y las cuatro de Monterrey; además, la terminal.
+  las siguientes entregas. La franja de la onda verde es `Onda verde`. En `Tramos/`, las cinco porciones de la avenida (dos
+  cuadras de casas, dos de comercios y el cruce) y las cuatro de Monterrey; además, la terminal.
 - `Assets/Modelos/`: el tope y el Cerro de la Silla en low poly.
 - `Assets/Shaders/`: el texto 3D del número de ruta, que respeta la profundidad, y el del cerro del horizonte, que se dibuja
   detrás de todo y se tiñe con la niebla.
