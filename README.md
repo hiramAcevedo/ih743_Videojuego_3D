@@ -153,6 +153,9 @@ En algunos cruces se agarra la onda verde, y con 10 topes brincados se guarda el
   y al soltarlos el camión vuelve a su curva. Al tocar sólo se ilumina la zona: rojo el freno, verde el acelerador y un
   destello en los carriles y el salto. Las guías (los arcos, las flechas y los letreros) se apagan desde la pausa o desde
   AJUSTES, el engrane, y queda guardado con `PlayerPrefs`. Son `ZonaTactil` y `ControlesTactiles`.
+- **Con el teléfono acostado:** Freno y Acelerador quedan junto a sus arcos, cada zona llega al centro y la lectura de metros
+  y km/h baja hasta abajo, entre los dos, para no tapar el camión; los avisos van entre la lectura y el camión. En vertical
+  todo queda igual. Lo acomoda `TableroHorizontal` cada vez que cambia el tamaño de la pantalla.
 - **El tablero nuevo:** la información salió del centro para no tapar la carretera. Arriba a la izquierda, PAUSA, el engrane
   y el indicador del poder; arriba a la derecha, los corazones y el panel con la ciudad, el tráfico con sus cuatro barras y lo
   que falta para la terminal; abajo al centro, los metros y los km/h. Los trazos de pincel son PNG con transparencia
@@ -160,8 +163,9 @@ En algunos cruces se agarra la onda verde, y con 10 topes brincados se guarda el
 
 ## Controles
 
-- Teléfono: la esquina de abajo a la izquierda o a la derecha cambia de carril; más arriba se brinca; abajo al centro se
-  mantienen Freno o Acelerador; el indicador del poder lo usa y PAUSA y el engrane están arriba a la izquierda.
+- Teléfono, parado o acostado: la esquina de abajo a la izquierda o a la derecha cambia de carril; más arriba se brinca; abajo,
+  entre los dos arcos, se mantienen Freno o Acelerador; el indicador del poder lo usa y PAUSA y el engrane están arriba a la
+  izquierda.
 - Computadora: flechas o A y D para el carril; barra, W o flecha arriba para brincar; S o flecha abajo para frenar; Shift
   para acelerar; E para usar el poder.
 - En el menú, PINTURA cambia la pintura del camión, NIVELES elige ciudad o la ruta libre y el engrane abre AJUSTES.
@@ -184,7 +188,8 @@ y Play.
   `RutaNiveles` (los niveles en orden), `BotonNivel` (una tarjeta del panel NIVELES), `Transicion` (el fundido entre escenas),
   `Horizonte` (el cerro del fondo), `Formato` (los números con coma de miles), `Aceleron` (el acelerón con sus estelas),
   `OndaVerde` (la franja de los cruces), `PoderSinTopes`, `ZonaTactil` y `ControlesTactiles` (los controles sin botones),
-  `Guias` y `BotonGuias` (el interruptor de las guías) y `Aviso` (los avisos del tablero).
+  `Guias` y `BotonGuias` (el interruptor de las guías), `Aviso` (los avisos del tablero) y `TableroHorizontal` (el tablero con
+  el teléfono acostado).
 - `Assets/Scenes/`: `Menu`, `Guadalajara`, `Monterrey` y `Ruta` (la ruta libre).
 - `Assets/Niveles/`: Guadalajara, Monterrey y la ruta de niveles.
 - `Assets/Etapas/`: Tráfico ligero, Tráfico medio, Hora pico y Viernes de quincena, y las tres de Monterrey (`MTY`).
