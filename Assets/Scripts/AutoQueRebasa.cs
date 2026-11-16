@@ -74,7 +74,9 @@ public class AutoQueRebasa : MonoBehaviour
         cuerpo.isKinematic = true;
         cuerpo.useGravity = false;
         cuerpo.interpolation = RigidbodyInterpolation.Interpolate;
-        cuerpo.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+        // Discreta: la especulativa agranda la caja del auto tanto como avanza en un paso de la física, más de 0.97 m desde los
+        // 175 km/h, que es lo que lo separa del camión en el carril de junto, y la partida se acababa sin que se tocaran.
+        cuerpo.collisionDetectionMode = CollisionDetectionMode.Discrete;
         PrenderDireccionales(0);
     }
 

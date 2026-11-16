@@ -51,6 +51,7 @@ public class CamionRuta : MonoBehaviour
     [SerializeField] Navegacion navegacion;
 
     const float KmhPorMetroPorSegundo = 3.6f;   // Unity mide la velocidad en metros por segundo
+    const float SeparacionDeChoque = 0.05f;     // metros: un contacto más separado que esto no es choque
 
     Rigidbody cuerpo;
     BoxCollider caja;
@@ -263,13 +264,35 @@ public class CamionRuta : MonoBehaviour
         }
         if (choque.collider.CompareTag("Obstaculo"))
         {
-            Detener(choque.collider);
+            ChocarSiLoToca(choque);
         }
         else if (choque.collider.CompareTag("Tope") && choque.collider != UltimoTope && !brincando && VelocidadActual >= brincoObligatorioDesde)
         {
             // Cada tope cuesta una vida como mucho, aunque el camión lo vuelva a tocar al pasarlo.
             UltimoTope = choque.collider;
             TopeSinBrincar?.Invoke();
+        }
+    }
+
+    // Un obstáculo cuyo contacto empezó antes de tocarlo puede tocarlo después sin que haya otro OnCollisionEnter.
+    void OnCollisionStay(Collision choque)
+    {
+        if (!detenido && !Llegando && choque.collider.CompareTag("Obstaculo"))
+        {
+            ChocarSiLoToca(choque);
+        }
+    }
+
+    // Sólo es choque si las cajas se tocan: la física adelanta contactos con lo que pasa muy rápido cerca, todavía separados.
+    void ChocarSiLoToca(Collision choque)
+    {
+        for (int i = 0; i < choque.contactCount; i++)
+        {
+            if (choque.GetContact(i).separation <= SeparacionDeChoque)
+            {
+                Detener(choque.collider);
+                return;
+            }
         }
     }
 }
