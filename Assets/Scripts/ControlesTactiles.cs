@@ -4,11 +4,11 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 // Los controles táctiles sin botones (4.6), como los dibujó Hiram: en cada esquina de abajo, dentro de un arco chico, el cambio
-// de carril; fuera de los arcos, hacia arriba, el salto; abajo al centro, entre los dos arcos y partidos por una raya, el freno
-// a la izquierda y el acelerador a la derecha, que actúan mientras se mantiene el dedo. No hay botones visibles: al tocar sólo se
-// ilumina la zona, en rojo el freno y en verde el acelerador, y los carriles y el salto con un destello. Las guías (arcos,
-// flechas y letreros) se encienden y se apagan con el interruptor de la pausa y de AJUSTES (Guias). Cada dedo es un puntero
-// aparte: se puede frenar con uno y cambiar de carril con otro.
+// de carril; fuera de los arcos, hacia arriba, el salto; abajo, entre los dos arcos y divididos al centro sin raya, el freno a
+// la izquierda y el acelerador a la derecha, que actúan mientras se mantiene el dedo (en horizontal, junto a sus arcos:
+// TableroHorizontal). No hay botones visibles: al tocar sólo se ilumina la zona, en rojo el freno y en verde el acelerador, y los
+// carriles y el salto con un destello. Las guías (arcos, flechas y letreros) se encienden y se apagan con el interruptor de la
+// pausa y de AJUSTES (Guias). Cada dedo es un puntero aparte: se puede frenar con uno y cambiar de carril con otro.
 public class ControlesTactiles : MonoBehaviour
 {
     [SerializeField] CamionRuta camion;
@@ -25,7 +25,7 @@ public class ControlesTactiles : MonoBehaviour
     [SerializeField, Min(0.05f)] float segundosDestello = 0.28f;
 
     [Header("Guías")]
-    [Tooltip("Los arcos, las flechas, «Salto», «Freno», «Acelerador» y la raya: se ven sólo con las guías encendidas.")]
+    [Tooltip("Los arcos, las flechas, «Salto», «Freno» y «Acelerador»: se ven sólo con las guías encendidas.")]
     [SerializeField] GameObject guias;
 
     readonly HashSet<int> dedosFreno = new HashSet<int>();

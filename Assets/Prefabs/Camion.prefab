@@ -34,8 +34,8 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6380933742967684698}
-  - {fileID: 577790839921225290}
-  - {fileID: 5337439010189287857}
+  - {fileID: 2873402779675128573}
+  - {fileID: 6423144658647063563}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &2326674328890228105
@@ -194,13 +194,13 @@ MonoBehaviour:
   segundos: 2.5
   subidaKmhPorSegundo: 140
   estelas:
-  - {fileID: 8543769044818470246}
-  - {fileID: 4744454912577469493}
+  - {fileID: 2498261895267299695}
+  - {fileID: 9183876838679268252}
   segundosEstela: 0.4
   camara: {fileID: 0}
   campoDeMas: 7
   rapidezCampo: 30
---- !u!1 &2575567058982961496
+--- !u!1 &3714739258895485754
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -208,38 +208,38 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 577790839921225290}
-  - component: {fileID: 8543769044818470246}
+  - component: {fileID: 6423144658647063563}
+  - component: {fileID: 9183876838679268252}
   m_Layer: 0
-  m_Name: Estela izquierda
+  m_Name: Estela derecha
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &577790839921225290
+--- !u!4 &6423144658647063563
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2575567058982961496}
+  m_GameObject: {fileID: 3714739258895485754}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.02, y: 0.55, z: -4.4}
+  m_LocalPosition: {x: 1.02, y: 0.55, z: -4.4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8412774182861485778}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!96 &8543769044818470246
+--- !u!96 &9183876838679268252
 TrailRenderer:
   serializedVersion: 4
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2575567058982961496}
+  m_GameObject: {fileID: 3714739258895485754}
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
@@ -351,7 +351,7 @@ TrailRenderer:
   m_Autodestruct: 0
   m_Emitting: 0
   m_ApplyActiveColorSpace: 1
---- !u!1 &4757736547497582298
+--- !u!1 &4830481777379966242
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -359,38 +359,38 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 5337439010189287857}
-  - component: {fileID: 4744454912577469493}
+  - component: {fileID: 2873402779675128573}
+  - component: {fileID: 2498261895267299695}
   m_Layer: 0
-  m_Name: Estela derecha
+  m_Name: Estela izquierda
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &5337439010189287857
+--- !u!4 &2873402779675128573
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4757736547497582298}
+  m_GameObject: {fileID: 4830481777379966242}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.02, y: 0.55, z: -4.4}
+  m_LocalPosition: {x: -1.02, y: 0.55, z: -4.4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8412774182861485778}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!96 &4744454912577469493
+--- !u!96 &2498261895267299695
 TrailRenderer:
   serializedVersion: 4
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4757736547497582298}
+  m_GameObject: {fileID: 4830481777379966242}
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
