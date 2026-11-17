@@ -242,6 +242,11 @@ public class GeneradorAvenida : MonoBehaviour
             if (letrero.name == "Ciudad")
             {
                 letrero.text = nivel.ciudad.ToUpperInvariant();
+                // El letrero mide lo que GUADALAJARA: un nombre más largo (CIUDAD DE MÉXICO) se achica para caber.
+                if (letrero.text.Length > 11)
+                {
+                    letrero.characterSize *= 11f / letrero.text.Length;
+                }
             }
         }
         foreach (var r in Terminal.GetComponentsInChildren<MeshRenderer>(true))

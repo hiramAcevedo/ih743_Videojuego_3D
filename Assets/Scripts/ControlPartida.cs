@@ -146,8 +146,10 @@ public class ControlPartida : MonoBehaviour
                 ciudades.Add(n.ciudad);
             }
         }
+        // Con tres ciudades o más, la última va en su renglón: «Guadalajara, Monterrey / y Ciudad de México», sin que «de México»
+        // quede sola abajo.
         string lista = ciudades.Count > 1
-            ? string.Join(", ", ciudades.GetRange(0, ciudades.Count - 1)) + " y " + ciudades[ciudades.Count - 1]
+            ? string.Join(", ", ciudades.GetRange(0, ciudades.Count - 1)) + (ciudades.Count > 2 ? "\ny " : " y ") + ciudades[ciudades.Count - 1]
             : ciudades[0];
         return "Ya manejaste " + lista;
     }
