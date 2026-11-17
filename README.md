@@ -179,12 +179,13 @@ En algunos cruces se agarra la onda verde, y con 10 topes brincados se guarda el
 - **Sonido:** cada ciudad tiene su música: dos piezas de mariachi en Guadalajara, tres de guitarra regional y corridos en
   Monterrey, y dos cumbias y una salsa en Ciudad de México; en el menú y en la ruta libre suena una al azar de las ocho. Cada
   partida empieza con una al azar de su lista y, cuando se acaba, sigue otra; en la pausa baja al 40 %. Suenan efectos al
-  chocar, al brincar, al pasar un tope, cuando un auto rebasa (un zumbido al pasar junto al camión), con el turbo de la onda
-  verde y con el arranque del poder sin topes, y un claxon avisa un segundo antes de que salga un auto a rebasar. AJUSTES
+  chocar, al brincar, al cambiar de carril (un whoosh corto, más bajo que el del brinco), al pasar un tope, cuando un auto
+  rebasa (un zumbido al pasar junto al camión), con el turbo de la onda verde y con el arranque del poder sin topes, y un
+  claxon avisa un segundo antes de que salga un auto a rebasar. AJUSTES
   trae interruptores para la música y los efectos, guardados con `PlayerPrefs`. Lo lleva `Sonido`. El audio va dentro del
   APK y no en el repositorio; la razón y los créditos están al final, en Audio.
 - **Para Android:** en Player Settings, el nombre Camión de ruta, el paquete `com.hiramacevedo.camionderuta`, la versión
-  1.1.0 (código 2: se instala encima de la 1.0.0, que no tenía sonido), el ícono (el camión de frente en la carretera, sobre
+  1.1.1 (código 3: se instala encima de las anteriores), el ícono (el camión de frente en la carretera, sobre
   el amarillo del tablero) con sus capas de ícono adaptable, Android 8.0 (API 26) como mínimo y Android 16 (API 36) como
   objetivo, IL2CPP con ARM64, y el teléfono se puede girar, parado o acostado. El APK va en el release `act-pi`.
 
@@ -220,7 +221,7 @@ agrega desde Unity Hub; luego File > Build Profiles > Android > Build.
   controles sin botones), `Guias` y `BotonGuias` (el interruptor de las guías), `Aviso` (los avisos del tablero),
   `TableroHorizontal` (el tablero con el teléfono acostado), `Sonido` (la música de cada escena y los efectos) y
   `BotonSonido` (los interruptores de la música y los efectos).
-- `Assets/Audio/` (fuera del repositorio; ver Audio): en `Musica/`, las ocho canciones en OGG; en `Efectos/`, los siete
+- `Assets/Audio/` (fuera del repositorio; ver Audio): en `Musica/`, las ocho canciones en OGG; en `Efectos/`, los ocho
   efectos en WAV mono. Los importa `Assets/Editor/ImportarAudio.cs`: la música en Streaming y Vorbis con calidad 0.4, los
   efectos en Decompress On Load, ADPCM y mono, para que el APK crezca lo menos posible.
 - `Assets/Scenes/`: `Menu`, `Guadalajara`, `Monterrey`, `CiudadDeMexico` y `Ruta` (la ruta libre).
@@ -270,5 +271,6 @@ efectos, a WAV mono sin silencio al inicio, y el arranque de motor del poder se 
 | Nitro Activation | el turbo de la onda verde | freesound_community | [Pixabay](https://pixabay.com/sound-effects/film-special-effects-nitro-activation-48077/) |
 | Car Engine Start (outside) | el poder sin topes | freesound_community | [Pixabay](https://pixabay.com/sound-effects/technology-car-engine-start-outside-72279/) |
 | Car Horn 02 | el claxon antes del rebase | Universfield | [Pixabay](https://pixabay.com/sound-effects/city-car-horn-02-153260/) |
+| Short Swoosh Whoosh Sound | el cambio de carril | biww | [Pixabay](https://pixabay.com/sound-effects/film-special-effects-short-swoosh-whoosh-sound-561933/) |
 
 En el menú y en la ruta libre suenan las ocho canciones.

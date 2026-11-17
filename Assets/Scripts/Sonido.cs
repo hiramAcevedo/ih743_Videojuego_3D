@@ -7,15 +7,15 @@ using UnityEngine;
 // fundido del final. En la pausa y en AJUSTES baja a "volumenEnPausa", y al cambiar de escena se apaga con el fundido de
 // Transicion.
 // Efectos: cada uno con su clip y su volumen en el Inspector, y su propia fuente. El juego los pide con Sonido.Tocar desde lo
-// que ya pasaba: el choque, el brinco y el tope (CamionRuta), el zumbido del auto que rebasa al pasar junto al camión
-// (AutoQueRebasa), el turbo de la onda verde (OndaVerde), el arranque del poder sin topes (PoderSinTopes) y el claxon que avisa
-// que viene un auto a rebasar (GeneradorAvenida).
+// que ya pasaba: el choque, el brinco, el tope y el cambio de carril (CamionRuta), el zumbido del auto que rebasa al pasar
+// junto al camión (AutoQueRebasa), el turbo de la onda verde (OndaVerde), el arranque del poder sin topes (PoderSinTopes) y el
+// claxon que avisa que viene un auto a rebasar (GeneradorAvenida).
 // Los interruptores de AJUSTES (BotonSonido) prenden y apagan la música y los efectos, y queda guardado con PlayerPrefs.
 // Sin los archivos de audio (no van en el repositorio por la licencia de Pixabay) los clips quedan vacíos: no suena nada y no
 // hay errores; la música sólo elige entre las canciones que sí tienen clip.
 public class Sonido : MonoBehaviour
 {
-    public enum Efecto { Choque, Brinco, Tope, Rebase, Turbo, Poder, Claxon }
+    public enum Efecto { Choque, Brinco, Tope, Rebase, Turbo, Poder, Claxon, Carril }
 
     [Serializable]
     public class Pista

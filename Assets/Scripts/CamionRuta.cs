@@ -308,7 +308,12 @@ public class CamionRuta : MonoBehaviour
             return;
         }
         int limite = carriles / 2;
+        int antes = carril;
         carril = Mathf.Clamp(carril + direccion, -limite, limite);
+        if (carril != antes)
+        {
+            Sonido.Tocar(Sonido.Efecto.Carril);   // PI: el whoosh del cambio de carril; contra la orilla no suena
+        }
     }
 
     bool TocaSuelo()
