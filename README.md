@@ -4,7 +4,7 @@ Videojuego 3D para teléfono Android de IH743 · Optativa Abierta III, unidad 4 
 Guadalajara, Licenciatura en Desarrollo de Sistemas Web). Hiram Agustín Acevedo López.
 
 Un camión de ruta avanza solo por una avenida mexicana: hay que cambiar de carril, brincar los topes y no chocar con los
-autos parados ni con los que lo rebasan. Son tres niveles: Guadalajara, Monterrey y Ciudad de México.
+autos parados ni con los que lo rebasan. Son tres niveles: Guadalajara, Monterrey y Ciudad de México, cada uno con su música.
 En algunos cruces se agarra la onda verde, y con 10 topes brincados se guarda el poder sin topes.
 
 ## Lo que hay en la entrega 4.1
@@ -176,10 +176,17 @@ En algunos cruces se agarra la onda verde, y con 10 topes brincados se guarda el
   Iztaccíhuatl y el Popocatépetl con nieve. La terminal es rosa mexicano y al cruzarla sale el fin de la ruta.
 - **Tres niveles que suben de dificultad:** Guadalajara (1,200 m, hasta 100 km/h), Monterrey (2,000 m, hasta 145 km/h) y
   Ciudad de México (2,400 m, hasta 160 km/h). Cada uno se abre al terminar el anterior, y NIVELES los muestra con su estado.
+- **Sonido:** cada ciudad tiene su música: dos piezas de mariachi en Guadalajara, tres de guitarra regional y corridos en
+  Monterrey, y dos cumbias y una salsa en Ciudad de México; en el menú y en la ruta libre suena una al azar de las ocho. Cada
+  partida empieza con una al azar de su lista y, cuando se acaba, sigue otra; en la pausa baja al 40 %. Suenan efectos al
+  chocar, al brincar, al pasar un tope, cuando un auto rebasa (un zumbido al pasar junto al camión), con el turbo de la onda
+  verde y con el arranque del poder sin topes, y un claxon avisa un segundo antes de que salga un auto a rebasar. AJUSTES
+  trae interruptores para la música y los efectos, guardados con `PlayerPrefs`. Lo lleva `Sonido`. El audio va dentro del
+  APK y no en el repositorio; la razón y los créditos están al final, en Audio.
 - **Para Android:** en Player Settings, el nombre Camión de ruta, el paquete `com.hiramacevedo.camionderuta`, la versión
-  1.0.0, el ícono (el camión de frente en la carretera, sobre el amarillo del tablero) con sus capas de ícono adaptable,
-  Android 8.0 (API 26) como mínimo y Android 16 (API 36) como objetivo, IL2CPP con ARM64, y el teléfono se puede girar,
-  parado o acostado. El APK va en el release `act-pi`.
+  1.1.0 (código 2: se instala encima de la 1.0.0, que no tenía sonido), el ícono (el camión de frente en la carretera, sobre
+  el amarillo del tablero) con sus capas de ícono adaptable, Android 8.0 (API 26) como mínimo y Android 16 (API 36) como
+  objetivo, IL2CPP con ARM64, y el teléfono se puede girar, parado o acostado. El APK va en el release `act-pi`.
 
 ## Controles
 
@@ -188,7 +195,8 @@ En algunos cruces se agarra la onda verde, y con 10 topes brincados se guarda el
   izquierda.
 - Computadora: flechas o A y D para el carril; barra, W o flecha arriba para brincar; S o flecha abajo para frenar; Shift
   para acelerar; E para usar el poder.
-- En el menú, PINTURA cambia la pintura del camión, NIVELES elige ciudad o la ruta libre y el engrane abre AJUSTES.
+- En el menú, PINTURA cambia la pintura del camión, NIVELES elige ciudad o la ruta libre y el engrane abre AJUSTES: las
+  guías, la música y los efectos.
 
 ## Abrir el proyecto
 
@@ -209,8 +217,12 @@ agrega desde Unity Hub; luego File > Build Profiles > Android > Build.
   `RutaNiveles` (los niveles en orden), `BotonNivel` (una tarjeta del panel NIVELES), `Transicion` (el fundido entre escenas),
   `Horizonte` (la sierra del fondo: el cerro o los volcanes), `Formato` (los números con coma de miles), `Aceleron` (el
   acelerón con sus estelas), `OndaVerde` (la franja de los cruces), `PoderSinTopes`, `ZonaTactil` y `ControlesTactiles` (los
-  controles sin botones), `Guias` y `BotonGuias` (el interruptor de las guías), `Aviso` (los avisos del tablero) y
-  `TableroHorizontal` (el tablero con el teléfono acostado).
+  controles sin botones), `Guias` y `BotonGuias` (el interruptor de las guías), `Aviso` (los avisos del tablero),
+  `TableroHorizontal` (el tablero con el teléfono acostado), `Sonido` (la música de cada escena y los efectos) y
+  `BotonSonido` (los interruptores de la música y los efectos).
+- `Assets/Audio/` (fuera del repositorio; ver Audio): en `Musica/`, las ocho canciones en OGG; en `Efectos/`, los siete
+  efectos en WAV mono. Los importa `Assets/Editor/ImportarAudio.cs`: la música en Streaming y Vorbis con calidad 0.4, los
+  efectos en Decompress On Load, ADPCM y mono, para que el APK crezca lo menos posible.
 - `Assets/Scenes/`: `Menu`, `Guadalajara`, `Monterrey`, `CiudadDeMexico` y `Ruta` (la ruta libre).
 - `Assets/Niveles/`: Guadalajara, Monterrey, Ciudad de México y la ruta de niveles.
 - `Assets/Etapas/`: Tráfico ligero, Tráfico medio, Hora pico y Viernes de quincena, las tres de Monterrey (`MTY`) y las cuatro
@@ -230,3 +242,33 @@ agrega desde Unity Hub; luego File > Build Profiles > Android > Build.
   detrás de todo y se tiñe con la niebla.
 
 Cada entrega lleva su etiqueta: `act-4.1`, `act-4.2`, etcétera, y el producto integrador, `act-pi`.
+
+## Audio
+
+Los términos de Pixabay no permiten subir sus audios a un repositorio tal como se descargan, así que la música y los efectos
+no están en este repositorio. El APK del release es el juego completo y sí los incluye. Quien clone el repositorio tiene el
+juego sin sonido: funciona igual, sin errores.
+
+La música y los efectos son de Pixabay, bajo la [Licencia de contenido de Pixabay](https://pixabay.com/service/license-summary/),
+que no exige atribución; aquí se acreditan de todos modos. Las canciones se pasaron a OGG y se normalizaron a -16 LUFS; los
+efectos, a WAV mono sin silencio al inicio, y el arranque de motor del poder se recortó a 2.7 s.
+
+| Canción o efecto | Dónde suena | Autor | Enlace |
+|---|---|---|---|
+| Corazón de Mariachi - Traditional Melancholic Mexican Folk Music | Guadalajara | JuliusH | [Pixabay](https://pixabay.com/music/urban-latin-coraz%C3%B3n-de-mariachi-traditional-melancholic-mexican-folk-music-524999/) |
+| Mexican Mariachi instrumental - Plaza de Papel | Guadalajara | Michael-Vault | [Pixabay](https://pixabay.com/music/modern-jazz-mexican-mariachi-instrumental-plaza-de-papel-580777/) |
+| Mexican Corridos acoustic | Monterrey | Drippeados | [Pixabay](https://pixabay.com/music/acoustic-group-mexican-corridos-acoustic-324282/) |
+| Regional Mexican Guitar | Monterrey | Drippeados | [Pixabay](https://pixabay.com/music/acoustic-group-regional-mexican-guitar-249679/) |
+| Soft Mexican Guitar | Monterrey | Drippeados | [Pixabay](https://pixabay.com/music/folk-soft-mexican-guitar-343137/) |
+| CUMBIA B | Ciudad de México | KAIRONVOSS | [Pixabay](https://pixabay.com/music/latin-cumbia-b-446534/) |
+| Cumbia de fuego | Ciudad de México | Jean-Paul-V | [Pixabay](https://pixabay.com/music/samba-latin-cumbia-de-fuego-276499/) |
+| Salsa Estilo New York 03 | Ciudad de México | vjgalaxy | [Pixabay](https://pixabay.com/music/latin-salsa-estilo-new-york-03-522534/) |
+| Car Crash Sound | el choque | DRAGON-STUDIO | [Pixabay](https://pixabay.com/sound-effects/film-special-effects-car-crash-sound-376882/) |
+| Swing Whoosh | el brinco | Jofae | [Pixabay](https://pixabay.com/sound-effects/film-special-effects-swing-whoosh-110410/) |
+| Thump | el tope | freesound_community | [Pixabay](https://pixabay.com/sound-effects/household-thump-105302/) |
+| Car Drive By Whoosh | el auto que rebasa | DRAGON-STUDIO | [Pixabay](https://pixabay.com/sound-effects/city-car-drive-by-whoosh-450445/) |
+| Nitro Activation | el turbo de la onda verde | freesound_community | [Pixabay](https://pixabay.com/sound-effects/film-special-effects-nitro-activation-48077/) |
+| Car Engine Start (outside) | el poder sin topes | freesound_community | [Pixabay](https://pixabay.com/sound-effects/technology-car-engine-start-outside-72279/) |
+| Car Horn 02 | el claxon antes del rebase | Universfield | [Pixabay](https://pixabay.com/sound-effects/city-car-horn-02-153260/) |
+
+En el menú y en la ruta libre suenan las ocho canciones.
