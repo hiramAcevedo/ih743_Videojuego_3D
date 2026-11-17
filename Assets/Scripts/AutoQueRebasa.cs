@@ -9,6 +9,7 @@ using UnityEngine;
 // cinemático para que el camión sí lo choque si se le echa encima de lado.
 // Guardada para cuando exista el freno (4.4): la maniobra de meterse delante del camión y frenar está en el commit ea17497 de
 // este archivo (CabeDelante, CorredorLibre y frenaDelante). Sin freno, un auto que se mete lento deja al camión sin salida.
+// PI: al pasar junto al camión pide a Sonido su zumbido, una vez, adelantado lo que tarda el sonido en llegar a lo más fuerte.
 [RequireComponent(typeof(Rigidbody))]
 public class AutoQueRebasa : MonoBehaviour
 {
@@ -38,6 +39,10 @@ public class AutoQueRebasa : MonoBehaviour
     [SerializeField] Renderer[] direccionalesDerecha;
     [SerializeField, Min(0.5f)] float parpadeosPorSegundo = 2.5f;
 
+    [Header("Sonido (PI)")]
+    [Tooltip("Segundos antes de quedar junto al camión en que empieza el zumbido: lo más fuerte del sonido llega a los 0.65 s.")]
+    [SerializeField, Min(0f)] float anticipacionZumbido = 0.65f;
+
     const float MedioLargo = 2.15f;        // el auto mide 4.3 m de largo
     const float MedioLargoCamion = 4.3f;   // y el camión, 8.6 m
     const float Separacion = 1f;           // los metros que deja al formarse detrás de un auto parado
@@ -56,6 +61,7 @@ public class AutoQueRebasa : MonoBehaviour
     float inicioDireccional;
     float cerca;                           // metros hasta lo que tiene enfrente en su carril (o infinito)
     float velocidadDeEnfrente;             // la velocidad de eso, en m/s: 0 si es un auto parado
+    bool zumbo;                            // ya sonó su zumbido al pasar junto al camión
 
     public Estado EstadoActual { get; private set; }
     public bool Loco { get; private set; }
@@ -174,6 +180,24 @@ public class AutoQueRebasa : MonoBehaviour
         velocidad = Mathf.MoveTowards(velocidad, porEnfrente, tasa * dt);
         pos.z += velocidad * dt;
         cuerpo.MovePosition(pos);
+        Zumbar(pos);
+    }
+
+    // El zumbido al pasar junto al camión: empieza cuando le faltan "anticipacionZumbido" segundos para quedar a su lado, a la
+    // velocidad con que se le acerca, y si va por un carril de junto.
+    void Zumbar(Vector3 pos)
+    {
+        if (zumbo)
+        {
+            return;
+        }
+        var camionEn = cuerpoCamion.position;
+        float seAcerca = Mathf.Max(0f, velocidad - VelocidadCamion);
+        if (pos.z >= camionEn.z - seAcerca * anticipacionZumbido && Mathf.Abs(pos.x - camionEn.x) < anchoCarril * 1.6f)
+        {
+            zumbo = true;
+            Sonido.Tocar(Sonido.Efecto.Rebase);
+        }
     }
 
     // Un auto parado enfrente: se pasa a un carril de junto que esté libre y que no sea el del camión cerca de él.

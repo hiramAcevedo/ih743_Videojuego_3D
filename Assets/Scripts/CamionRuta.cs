@@ -14,6 +14,7 @@ using UnityEngine.InputSystem;
 // soltarlos vuelve a la velocidad de su curva. El acelerón (Aceleron: la onda verde y el poder sin topes) lo sube unos km/h
 // sobre la curva unos segundos; el acelerador y el acelerón no se suman, manda el mayor, y pisar el freno corta el acelerón.
 // También lleva la cuenta de los topes que tocó, para que PoderSinTopes sepa cuáles se brincaron.
+// PI: pide a Sonido el brinco al despegar, el golpe del tope la primera vez que toca cada uno y el choque con un auto.
 [RequireComponent(typeof(Rigidbody))]
 public class CamionRuta : MonoBehaviour
 {
@@ -171,6 +172,7 @@ public class CamionRuta : MonoBehaviour
             {
                 vy = impulsoBrinco;
                 brincando = true;
+                Sonido.Tocar(Sonido.Efecto.Brinco);
             }
         }
         else if (brincando && EnElSuelo && vy <= 0f)
@@ -350,7 +352,10 @@ public class CamionRuta : MonoBehaviour
             {
                 topesTocados.RemoveWhere(t => t == null);
             }
-            topesTocados.Add(choque.collider);
+            if (topesTocados.Add(choque.collider))
+            {
+                Sonido.Tocar(Sonido.Efecto.Tope);
+            }
         }
         if (choque.collider.CompareTag("Obstaculo"))
         {
@@ -380,6 +385,7 @@ public class CamionRuta : MonoBehaviour
         {
             if (choque.GetContact(i).separation <= SeparacionDeChoque)
             {
+                Sonido.Tocar(Sonido.Efecto.Choque);
                 Detener(choque.collider);
                 return;
             }

@@ -110,3 +110,9 @@ InitTestScene*.unity*
 ._*
 .idea/
 .vscode/
+
+# Audio de Pixabay (producto integrador): sus términos no permiten subirlo a un repositorio tal como se descarga. Va sólo
+# dentro del APK del release; quien clone el repositorio tiene el juego sin sonido. Se ignoran también sus .meta y los de
+# las carpetas, para que Unity no encuentre .meta huérfanos al abrir un clon.
+/[Aa]ssets/[Aa]udio/
+/[Aa]ssets/[Aa]udio.meta

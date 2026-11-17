@@ -12,6 +12,7 @@ using UnityEngine.UI;
 // 4.6: las vidas son tres corazones dibujados (imágenes) en el tablero nuevo, los avisos salen con Aviso arriba de los metros y
 // los km/h, y al jugar de nuevo se apagan el acelerón y el poder activo; lo brincado y el poder guardado se quedan para el
 // intento nuevo (PoderSinTopes).
+// PI: cada partida nueva en la misma escena (JUGAR DE NUEVO y REINICIAR) pide a Sonido otra canción de la lista de la ciudad.
 public class ControlPartida : MonoBehaviour
 {
     [Header("Nivel")]
@@ -254,6 +255,7 @@ public class ControlPartida : MonoBehaviour
         Vidas = vidasIniciales;
         PintarVidas();
         Avisar("");
+        Sonido.NuevaPartida();   // PI: otra canción de la lista de la ciudad
         if (camara != null)
         {
             camara.Colocar();

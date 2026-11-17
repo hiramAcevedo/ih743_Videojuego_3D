@@ -115,6 +115,7 @@ public class PoderSinTopes : MonoBehaviour
         Guardar();
         hasta = Time.time + segundos;
         Usos++;
+        Sonido.Tocar(Sonido.Efecto.Poder);   // PI: el arranque de motor, sin el turbo de la onda verde encima
         HundirTopesDelante();
         if (camion.Aceleron != null)
         {
