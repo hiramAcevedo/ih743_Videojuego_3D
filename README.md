@@ -1,10 +1,10 @@
 # Camión de ruta
 
-Videojuego 3D para teléfono de IH743 · Optativa Abierta III, unidad 4 (Universidad de Guadalajara, Licenciatura en
-Desarrollo de Sistemas Web). Hiram Agustín Acevedo López.
+Videojuego 3D para teléfono Android de IH743 · Optativa Abierta III, unidad 4 y producto integrador (Universidad de
+Guadalajara, Licenciatura en Desarrollo de Sistemas Web). Hiram Agustín Acevedo López.
 
 Un camión de ruta avanza solo por una avenida mexicana: hay que cambiar de carril, brincar los topes y no chocar con los
-autos parados ni con los que lo rebasan. Guadalajara y Monterrey ya son niveles; Ciudad de México será el tercero.
+autos parados ni con los que lo rebasan. Son tres niveles: Guadalajara, Monterrey y Ciudad de México.
 En algunos cruces se agarra la onda verde, y con 10 topes brincados se guarda el poder sin topes.
 
 ## Lo que hay en la entrega 4.1
@@ -161,6 +161,26 @@ En algunos cruces se agarra la onda verde, y con 10 topes brincados se guarda el
   que falta para la terminal; abajo al centro, los metros y los km/h. Los trazos de pincel son PNG con transparencia
   dibujados por un script, la letra es la manuscrita Kalam Bold y los avisos salen arriba de los metros.
 
+## Lo que hay en el producto integrador
+
+<p align="center">
+  <img src="docs/capturas/pi-cdmx.png" width="270" alt="Ciudad de México por la mañana, en el tráfico medio, con fachadas de tezontle, cantera y rosa mexicano y los volcanes en la bruma, a los 160 m, en vertical">
+  <img src="docs/capturas/pi-noche.png" width="270" alt="Ciudad de México en la noche de quincena, la cuarta etapa: la onda verde a 188 km/h y la silueta de los volcanes, a 550 m de la terminal, en vertical">
+  <img src="docs/capturas/pi-niveles.png" width="270" alt="El panel NIVELES con Guadalajara, Monterrey y Ciudad de México terminados y la ruta libre con su récord, en vertical">
+</p>
+
+- **Ciudad de México, el tercer nivel:** 2,400 m; sale a 70 km/h, pasa de 120 km/h hacia los 600 m y llega a 160 km/h. Sube
+  en cuatro etapas: tráfico medio desde la salida, hora pico desde los 400 m, viernes de quincena desde los 1,000 m y noche de
+  quincena desde los 1,700 m, con filas más juntas y más autos que rebasan que en Monterrey; los autos locos salen desde los
+  600 m. Sus cuadras son de tezontle, cantera y los colores de Coyoacán, con espectaculares, y en el horizonte están el
+  Iztaccíhuatl y el Popocatépetl con nieve. La terminal es rosa mexicano y al cruzarla sale el fin de la ruta.
+- **Tres niveles que suben de dificultad:** Guadalajara (1,200 m, hasta 100 km/h), Monterrey (2,000 m, hasta 145 km/h) y
+  Ciudad de México (2,400 m, hasta 160 km/h). Cada uno se abre al terminar el anterior, y NIVELES los muestra con su estado.
+- **Para Android:** en Player Settings, el nombre Camión de ruta, el paquete `com.hiramacevedo.camionderuta`, la versión
+  1.0.0, el ícono (el camión de frente en la carretera, sobre el amarillo del tablero) con sus capas de ícono adaptable,
+  Android 8.0 (API 26) como mínimo y Android 16 (API 36) como objetivo, IL2CPP con ARM64, y el teléfono se puede girar,
+  parado o acostado. El APK va en el release `act-pi`.
+
 ## Controles
 
 - Teléfono, parado o acostado: la esquina de abajo a la izquierda o a la derecha cambia de carril; más arriba se brinca; abajo,
@@ -173,7 +193,8 @@ En algunos cruces se agarra la onda verde, y con 10 topes brincados se guarda el
 ## Abrir el proyecto
 
 Unity 6000.5.9f1 con la plantilla Universal 3D. Se abre la carpeta desde Unity Hub, después `Assets/Scenes/Menu.unity`,
-y Play.
+y Play. Para compilar el APK hace falta el módulo Android Build Support, con OpenJDK y Android SDK & NDK Tools, que se
+agrega desde Unity Hub; luego File > Build Profiles > Android > Build.
 
 ## Estructura
 
@@ -186,24 +207,26 @@ y Play.
   pantalla), `Girar`, `TextoConProfundidad`, `LuzDelDia` (la hora del día de cada etapa), `PinturaCamion` (una pintura del
   camión), `PintarCamion` (aplica la pintura elegida), `BotonPintura` (el botón PINTURA del menú), `NivelRuta` (un nivel),
   `RutaNiveles` (los niveles en orden), `BotonNivel` (una tarjeta del panel NIVELES), `Transicion` (el fundido entre escenas),
-  `Horizonte` (el cerro del fondo), `Formato` (los números con coma de miles), `Aceleron` (el acelerón con sus estelas),
-  `OndaVerde` (la franja de los cruces), `PoderSinTopes`, `ZonaTactil` y `ControlesTactiles` (los controles sin botones),
-  `Guias` y `BotonGuias` (el interruptor de las guías), `Aviso` (los avisos del tablero) y `TableroHorizontal` (el tablero con
-  el teléfono acostado).
-- `Assets/Scenes/`: `Menu`, `Guadalajara`, `Monterrey` y `Ruta` (la ruta libre).
-- `Assets/Niveles/`: Guadalajara, Monterrey y la ruta de niveles.
-- `Assets/Etapas/`: Tráfico ligero, Tráfico medio, Hora pico y Viernes de quincena, y las tres de Monterrey (`MTY`).
+  `Horizonte` (la sierra del fondo: el cerro o los volcanes), `Formato` (los números con coma de miles), `Aceleron` (el
+  acelerón con sus estelas), `OndaVerde` (la franja de los cruces), `PoderSinTopes`, `ZonaTactil` y `ControlesTactiles` (los
+  controles sin botones), `Guias` y `BotonGuias` (el interruptor de las guías), `Aviso` (los avisos del tablero) y
+  `TableroHorizontal` (el tablero con el teléfono acostado).
+- `Assets/Scenes/`: `Menu`, `Guadalajara`, `Monterrey`, `CiudadDeMexico` y `Ruta` (la ruta libre).
+- `Assets/Niveles/`: Guadalajara, Monterrey, Ciudad de México y la ruta de niveles.
+- `Assets/Etapas/`: Tráfico ligero, Tráfico medio, Hora pico y Viernes de quincena, las tres de Monterrey (`MTY`) y las cuatro
+  de Ciudad de México (`CDMX`).
 - `Assets/Pinturas/`: Verde Mi Transporte, Roja R-400 y Blanca R-182.
 - `Assets/Posproceso/`: el perfil del volumen, con el bloom y el viñeteado.
 - `Assets/Interfaz/Trazos/`: los trazos de pincel, los íconos y los brillos del tablero, en PNG con transparencia.
 - `Assets/Interfaz/Fuentes/`: la letra del tablero, Kalam Bold, de Indian Type Foundry, tomada de Google Fonts con licencia
   SIL Open Font License 1.1; el texto de la licencia va junto a la letra, en `Kalam-OFL.txt`.
+- `Assets/Interfaz/Icono/`: el ícono (`icono.png`) y las dos capas del ícono adaptable de Android (el fondo y el camión).
 - `Assets/Prefabs/`: el camión, tres autos, sus tres variantes que rebasan (con direccionales) y el tope, armados con
-  figuras básicas de Unity. El camión lleva el número R-743 y la pintura elegida en el menú; el modelo definitivo llega en
-  las siguientes entregas. La franja de la onda verde es `Onda verde`. En `Tramos/`, las cinco porciones de la avenida (dos
-  cuadras de casas, dos de comercios y el cruce) y las cuatro de Monterrey; además, la terminal.
-- `Assets/Modelos/`: el tope y el Cerro de la Silla en low poly.
+  figuras básicas de Unity. El camión lleva el número R-743 y la pintura elegida en el menú. La franja de la onda verde es
+  `Onda verde`. En `Tramos/`, las cinco porciones de la avenida (dos cuadras de casas, dos de comercios y el cruce), las
+  cuatro de Monterrey y las cuatro de Ciudad de México; además, la terminal.
+- `Assets/Modelos/`: el tope, el Cerro de la Silla y los volcanes (el Iztaccíhuatl y el Popocatépetl) en low poly.
 - `Assets/Shaders/`: el texto 3D del número de ruta, que respeta la profundidad, y el del cerro del horizonte, que se dibuja
   detrás de todo y se tiñe con la niebla.
 
-Cada entrega lleva su etiqueta: `act-4.1`, `act-4.2`, etcétera.
+Cada entrega lleva su etiqueta: `act-4.1`, `act-4.2`, etcétera, y el producto integrador, `act-pi`.
